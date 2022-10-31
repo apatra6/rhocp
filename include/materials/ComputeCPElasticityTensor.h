@@ -1,12 +1,9 @@
 #ifndef COMPUTECPELASTICITYTENSOR_H
 #define COMPUTECPELASTICITYTENSOR_H
 
+#pragma once
+
 #include "ComputeElasticityTensorBase.h"
-
-class ComputeCPElasticityTensor;
-
-template <>
-InputParameters validParams<ComputeCPElasticityTensor>();
 
 class ComputeCPElasticityTensor : public ComputeElasticityTensorBase
 {
@@ -20,4 +17,5 @@ protected:
 
   const MaterialProperty<RankFourTensor> & _Cel_cp;
 };
+
 #endif //COMPUTECPELASTICITYTENSOR_H
