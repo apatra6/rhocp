@@ -1,0 +1,92 @@
+#include "ComputeStressBase.h"
+#include "EulerAngleReader.h"
+#include "EBSDMeshReader.h"
+
+//Forward Declaration
+class DDCPHCPStressUpdate;
+
+template<>
+InputParameters validParams<DDCPHCPStressUpdate>();
+
+class DDCPHCPStressUpdate : public ComputeStressBase
+{
+public:
+  DDCPHCPStressUpdate(const InputParameters & parameters);
+  virtual ~DDCPHCPStressUpdate();
+
+protected:
+  FileName _propsFile;
+  FileName _slipSysFile;
+
+  unsigned int _num_props;
+  unsigned int _num_slip_sys;
+  unsigned int _num_twin_sys;
+  unsigned int _num_state_vars;
+
+  int _grainid;
+
+  const Real _tol;
+  const VariableValue & _temp;
+
+  const EulerAngleReader * _EulerAngFileReader;
+  const EBSDMeshReader * _EBSDFileReader;
+
+  int _isEulerRadian;
+  int _isEulerBunge;
+
+  virtual void initQpStatefulProperties();
+  virtual void computeQpStress();
+
+  void fort_inverse(int n,std::vector<std::vector<Real>> &a, std::vector<std::vector<Real>> &b, int &isingular);
+  void LU_Decomp(int n, std::vector<std::vector<Real>> &c, std::vector<int> &index,int &isingular);
+  void LU_BackSub(int n, std::vector<std::vector<Real>> &c, std::vector<int> &index, std::vector<Real> &vec);
+  Real max_val(Real a,Real b);
+
+  MaterialProperty<Point> & _euler_ang;
+
+  MaterialProperty<std::vector<Real> > & _state_var;
+  const MaterialProperty<std::vector<Real> > & _state_var_old;
+  MaterialProperty<std::vector<Real> > & _properties;
+  const MaterialProperty<std::vector<Real> > & _properties_old;
+
+  // Miller indices of slip plane normals
+  MaterialProperty<std::vector<std::vector<Real> > > & _y;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _y_old;
+  // Miller indices of slip directions
+  MaterialProperty<std::vector<std::vector<Real> > > & _z;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _z_old;
+
+  const MaterialProperty<RankTwoTensor> & _deformation_gradient;
+  const MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
+  MaterialProperty<RankFourTensor> & _Cel_cp;
+
+  // parameters/variables used for calculations
+  static const int max_loops = 20;
+  void readPropsFile();
+  void assignProperties();
+  void normalize_vector(Real*, Real*, Real*);
+  void rotate_4th(Real a[3][3], Real b[3][3][3][3], Real (&c)[3][3][3][3]);
+  void forth_to_Voigt(Real a[3][3][3][3], Real (&b)[6][6]);
+  void Voigt_to_forth(Real b[6][6], Real (&a)[3][3][3][3]);
+  void aaaa_dot_dot_bbbb(Real a[3][3][3][3], Real b[3][3][3][3], Real (&product)[3][3][3][3]);
+  void aaaa_dot_dot_bb(Real a[3][3][3][3], Real b[3][3], Real (&product)[3][3]);
+  void aa_dot_bb(Real a[3][3], Real b[3][3], Real (&product)[3][3]);
+  Real aa_dot_dot_bb(Real a[3][3], Real b[3][3]);
+  void bunge_angles(Real (&array1)[3][3], Real (&psi0)[3]);
+  Real power(Real x, Real y);
+  Real sgn(Real x);
+
+  void NR_residual (unsigned int num_slip_sys, unsigned int num_twin_sys, int &itvariant, bool &TwinAllowed, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gamma_dot, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &rho_i0, std::vector<Real> &rho_i, std::vector<Real> &bstress0, std::vector<Real> &bstress, std::vector<Real> &twin_fraction0, std::vector<Real> &twin_fraction, Real tot_twin_fraction, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse);
+
+  unsigned int isx(unsigned int islip);
+
+  Real tolerance;
+
+  // Material parameters
+  Real C11, C12, C13, C33, C44, G, ca_ratio, b_mag[4], gammadot0g[4], enthalpy_const[4], p[4], q[4], p0[4], tau0[4], hp_coeff[4], grain_size[4], frictional_stress[4], q_t[4], x_d[4], Alatent[4], rho_m_zero[4], rho_i_zero[4], d_disl_zero[4], k_mul[4], R_c[4], k_ann[4], k_dyn[4], k_bs1[4], k_bs2[4], B_k, freq, tau_twin, drag_twin, gd0twin, exp_twin, gamma_twin, twin_frac_reorient;
+
+  Real sse;
+};
