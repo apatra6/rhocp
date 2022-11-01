@@ -675,17 +675,9 @@ void DDCPStressUpdate::computeQpStress()
     }
 
     std::vector<std::vector<Real>> temp1_inv(_num_slip_sys, std::vector<Real>(_num_slip_sys));
-    int isingular = 0;
 
-    // Method 1: Numerical recipes method: fort_inverse
-    fort_inverse(_num_slip_sys, temp1, temp1_inv, isingular);
-    if (isingular == 1){
-      throw MooseException("temp1_inv: Singularity in matrix inversion");
-      return;
-    }
-
-//       // Method 2: MatrixTools inverse
-//       MatrixTools::inverse (temp1,temp1_inv);
+    // Method 2: MatrixTools inverse
+    MatrixTools::inverse (temp1,temp1_inv);
 
     for(unsigned int ia = 0; ia < _num_slip_sys; ia++) {
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
@@ -769,10 +761,18 @@ void DDCPStressUpdate::computeQpStress()
     }
 
     // Solve for increment of gamma_dot
-    std::vector<int> index(_num_slip_sys);
     std::vector<Real> d_gamma_dot(_num_slip_sys);
-    LU_Decomp(_num_slip_sys,array3,index,isingular);
-    LU_BackSub(_num_slip_sys,array3,index,d_gamma_dot);
+
+    std::vector<std::vector<Real>> array3_inv(_num_slip_sys, std::vector<Real>(_num_slip_sys));
+
+    MatrixTools::inverse(array3,array3_inv);
+
+    for(unsigned int j = 0; j < _num_slip_sys; j++) {
+      d_gamma_dot[j] = 0.0;
+      for(unsigned int i = 0; i < _num_slip_sys; i++) {
+        d_gamma_dot[j] = d_gamma_dot[j] - array3_inv[j][i]*residual[i];
+      }
+    }
 
     // Check to make sure that N-R step leads 'down hill' the sse surface
     Real sum1 = 0.0;
@@ -1036,16 +1036,8 @@ void DDCPStressUpdate::computeQpStress()
     }
   }
 
-  // Method 1: fort_inverse
-  int isingular = 0;
-  fort_inverse(6, array4_matrix, array4_inv_matrix, isingular);
-  if (isingular == 1){
-    throw MooseException("array4_matrix: Singularity in matrix inversion");
-    return;
-  }
-
-//   // Method 2: MatrixTools::inverse
-//   MatrixTools::inverse(array4_matrix,array4_inv_matrix);
+  // Method 2: MatrixTools::inverse
+  MatrixTools::inverse(array4_matrix,array4_inv_matrix);
 
   for (unsigned int i = 0; i < 6; i++) {
     for (unsigned int j = 0; j < 6; j++) {
@@ -1452,7 +1444,10 @@ void DDCPStressUpdate::readPropsFile() {
 
   // Assign slip system normals and slip directions for a BCC material
   for (unsigned int i = 0; i < _num_props; i++) {
-    file_prop >> _properties[_qp][i];
+    // file_prop >> _properties[_qp][i];
+    if (!(file_prop >> _properties[_qp][i])) {
+      mooseError("Required number of material parameters not supplied for crystal plasticity model");
+    }
   }
 
   file_prop.close();
@@ -1738,188 +1733,5 @@ Real DDCPStressUpdate::max_val(Real a, Real b)
   else
   {
     return b;
-  }
-}
-
-// These functions are used to calculate the inverse of n-dimensional 2D matrices
-// These algorithms are based on Numerical Recipes: The Art of Scientific Computing (http://numerical.recipes/)
-void DDCPStressUpdate::fort_inverse(int n, std::vector<std::vector<Real>> &a, std::vector<std::vector<Real>> &b, int &isingular)
-{
-  std::vector<std::vector<Real>> c_mat(n, std::vector<Real>(n));
-  std::vector<int> index(n);
-  std::vector<Real> vec(n);
-
-  isingular=0;
-  for(int i=0;i<n;i++)
-  {
-    for(int j=0;j<n;j++)
-    {
-      c_mat[i][j]=a[i][j];
-    //  cout<<c[i][j]<<"\t";
-    }
-  }
-  for(int i=0;i<n;i++)
-  {
-    for(int j=0;j<n;j++)
-    {
-      b[i][j]=0.0;
-    }
-    b[i][i]=1.0;
-  }
-
-  // LU_Decomp(n,c_mat,index,isingular);
-  LU_Decomp(n,c_mat,index,isingular);
-
-  if (isingular==1)
-  {
-    //this is alternative to break
-    return;
-  }
-
-  for(int j=0;j<n;j++)
-  {
-    for (int k=0;k<n;k++)
-    {
-      vec[k]=b[k][j];
-    }
-
-    LU_BackSub(n,c_mat,index,vec);
-
-    for (int k=0;k<n;k++)
-    {
-      b[k][j]=vec[k];
-    }
-  }
-}
-
-void DDCPStressUpdate::LU_Decomp(int n,std::vector<std::vector<Real>> &c, std::vector<int> &index, int &isingular)
-{
-  Real tiny=1e-20;
-  Real a_max=0.0;
-  std::vector<Real> v(n);
-  Real sum1=0.0,dummy=0.0;
-  int imax;
-
-  //Loop over rows
-  for(int i=0;i<n;i++)
-  {
-    a_max = 0.0;
-    for(int j=0;j<n;j++)
-    {
-      a_max=max_val(a_max,c[i][j]);
-     // cout<<a_max<<"\t";
-    }
-    if(a_max==0)
-    {
-      isingular=1;
-      //this is alternative to break
-      return ;
-    }
-    v[i]=1/a_max;
-   // cout<<"\n";
-  }
-
-  sum1=0.0;
-  //Begin big loop over all the columns.
-  for(int j=0;j<n;j++)
-  {
-    for(int i=0;i<=j-1;i++)
-    {
-      sum1 = c[i][j];
- //     cout<<sum1<<"\t"<<i<<"\t"<<j<<"\n";
-      for(int k=0;k<=i-1;k++)
-      {
-        sum1 = sum1 - c[i][k] * c[k][j];
-      }
-      c[i][j]=sum1;
-    }
-
-    a_max=0.0;
-    for(int i=j;i<n;i++)
-    {
-      sum1=c[i][j];
-      for(int k=0;k<=j-1;k++)
-      {
-        sum1 = sum1 - c[i][k] * c[k][j];
-      }
-      c[i][j]=sum1;
-      dummy = v[i] * abs(sum1);
-
-      if (dummy>a_max)
-      {
-        imax=i;
-        a_max=dummy;
-      }
-    }
-
-    //pivoting of rows
-    if (j!=imax)
-    {
-      for(int k=0;k<n;k++)
-      {
-        dummy=c[imax][k];
-        c[imax][k]=c[j][k];
-        c[j][k]=dummy;
-      }
-      v[imax]=v[j];
-    }
-    index[j]=imax;
-
-    // divide by the pivot element
-    if(c[j][j]==0.0) c[j][j]=tiny;
-
-    if (j!=n)
-    {
-      dummy=1.0/c[j][j];
-      for(int i=j+1;i<n;i++)
-      {
-        c[i][j]=c[i][j] * dummy;
-      }
-    }
-    isingular=0;
-  }
-
-}
-
-void DDCPStressUpdate::LU_BackSub(int n, std::vector<std::vector<Real>> &c, std::vector<int> &index, std::vector<Real> &vec)
-{
-  int ii=0;
-  Real sum1=0.0;
-  //Real b[n];
-  int m;
-
-  //forward substitution
-  for(int i=0;i<n;i++)
-  {
-    m=index[i];
-    sum1 = vec[m];
-    vec[m]=vec[i];
-    if(ii!=0)
-    {
-      for(int j=ii;j<i-1;j++)
-      {
-        sum1 = sum1 - c[i][j] * vec[j];
-      }
-    }
-    else if(sum1!=0.0)
-    {
-      ii=i;
-    }
-    vec[i]=sum1;
-  }
-
-  //backward substitution
-  for(int i=n-1;i>=0;i--)
-  {
-    sum1 = vec[i];
-    if (i<n-1)
-    {
-      for(int j=i+1;j<n;j++)
-      {
-        sum1 = sum1 - c[i][j] * vec[j];
-      }
-    }
-
-    vec[i] = sum1/c[i][i];
   }
 }

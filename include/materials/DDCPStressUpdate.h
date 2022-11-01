@@ -36,9 +36,6 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpStress();
 
-  void fort_inverse(int n,std::vector<std::vector<Real>> &a, std::vector<std::vector<Real>> &b, int &isingular);
-  void LU_Decomp(int n, std::vector<std::vector<Real>> &c, std::vector<int> &index,int &isingular);
-  void LU_BackSub(int n, std::vector<std::vector<Real>> &c, std::vector<int> &index, std::vector<Real> &vec);
   Real max_val(Real a,Real b);
 
   MaterialProperty<Point> & _euler_ang;

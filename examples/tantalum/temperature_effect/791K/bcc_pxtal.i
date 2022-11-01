@@ -226,8 +226,8 @@
 
   [./dts]
     type = PiecewiseLinear
-    x = '0         0.01'
-    y = '0.0001    0.01'
+    x = '0         0.05'
+    y = '0.0001    0.05'
   [../]
 []
 
@@ -300,7 +300,7 @@
     slipSysFile = bcc_slip_sys.in
     num_slip_sys = 24
     num_state_vars = 122 # 50 + 3*num_slip_sys
-    num_props = 26
+    num_props = 28
     temp = 791 # K
     tol = 5e-7
     EulerAngFileReader = euler_angle
