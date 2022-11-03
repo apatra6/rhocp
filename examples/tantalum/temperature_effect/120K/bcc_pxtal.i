@@ -301,7 +301,7 @@
     num_slip_sys = 24
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
-    temp = 298 # K
+    temp = 120 # K
     tol = 5e-7
     EulerAngFileReader = euler_angle
   [../]
@@ -411,7 +411,7 @@
 []
 
 [Outputs]
-  file_base = out_298K
+  file_base = out_120K
   csv = true
   print_linear_residuals = true
   perf_graph = true

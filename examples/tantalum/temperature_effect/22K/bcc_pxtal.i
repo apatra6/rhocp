@@ -300,7 +300,7 @@
     slipSysFile = bcc_slip_sys.in
     num_slip_sys = 24
     num_state_vars = 122 # 50 + 3*num_slip_sys
-    num_props = 28
+    num_props = 30
     temp = 22 # K
     tol = 5e-7
     EulerAngFileReader = euler_angle
@@ -422,7 +422,7 @@
   [../]
   [./cp]
     type = Checkpoint
-    interval = 10000
+    interval = 100
     num_files = 2
   [../]
 []

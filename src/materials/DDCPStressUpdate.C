@@ -237,7 +237,7 @@ void DDCPStressUpdate::computeQpStress()
         sum1 = sum1 + _y[_qp][i][k]*_z[_qp][i][k];
       }
       if (abs(sum1) > 1.0e-8) {
-        mooseError("The Miller indices are WRONG!!!");
+        mooseError("The Miller indices are WRONG for slip system:",(k + 1));
         break;
       }
     }
@@ -1462,43 +1462,49 @@ void DDCPStressUpdate::assignProperties(){
   C12_perK = _properties[_qp][3];
   C44 = _properties[_qp][4];
   C44_perK = _properties[_qp][5];
+  G = _properties[_qp][6];
+  G_perK = _properties[_qp][7];
 
   C11 = C11 - C11_perK*_temp[_qp];
   C12 = C12 - C12_perK*_temp[_qp];
   C44 = C44 - C44_perK*_temp[_qp];
+  G = G - G_perK*_temp[_qp];
 
-  G = 0.5e0*(C11 - C12);
+  // use the appropriate one
+  // G = 0.5e0*(C11 - C12);
+  // G = sqrt(C44*0.5e0*(C11 - C12));
+  // G = C44;
 
-  b_mag = _properties[_qp][6];  // Burgers vector magnitude
+  b_mag = _properties[_qp][8];  // Burgers vector magnitude
 
   // Flow parameters
-  gammadot0g = _properties[_qp][7];  // reference strain rate
-  enthalpy_const = _properties[_qp][8];  // Multiplication constant for enthalpy term
-  p = _properties[_qp][9];  // Shape parameter (dislocation glide)
-  q = _properties[_qp][10];  // Shape parameter (dislocation glide)
+  gammadot0g = _properties[_qp][9];  // reference strain rate
+  enthalpy_const = _properties[_qp][10];  // Multiplication constant for enthalpy term
+  p = _properties[_qp][11];  // Shape parameter (dislocation glide)
+  q = _properties[_qp][12];  // Shape parameter (dislocation glide)
 
   // Hardening parameters
-  tau0 = _properties[_qp][11];  // Athermal slip resistance constant
-  hp_coeff = _properties[_qp][12];  // Hall-Petch coefficient <TBA>
-  grain_size = _properties[_qp][13];  // Grain size (for Hall-Petch term) <TBA>
+  tau0 = _properties[_qp][13];  // Athermal slip resistance constant
+  hp_coeff = _properties[_qp][14];  // Hall-Petch coefficient <TBA>
+  grain_size = _properties[_qp][15];  // Grain size (for Hall-Petch term) <TBA>
 
-  frictional_stress = _properties[_qp][14]; // Lattice frictional resistance
-  p0 = _properties[_qp][15];  // Dislocation barrier strength
-  q_t = _properties[_qp][16];  // Taylor hardening parameter
-  x_d = _properties[_qp][17];  // Mean free path constant (dislocation network)
+  frictional_stress = _properties[_qp][16]; // Lattice frictional resistance
+  p0 = _properties[_qp][17];  // Dislocation barrier strength
+  q_t = _properties[_qp][18];  // Taylor hardening parameter
+  x_d = _properties[_qp][19];  // Mean free path constant (dislocation network)
 
-  Alatent = _properties[_qp][18];  // Latent hardening coefficient
+  Alatent = _properties[_qp][20];  // Latent hardening coefficient
 
   // Dislocation evolution parameters
-  rho_m_zero = _properties[_qp][19];  // Initial mobile dislocation density
-  rho_i_zero = _properties[_qp][20];  // Initial immobile dislocation density
-  d_disl_zero = _properties[_qp][21];  // Initial dislocation line length
-  k_mul = _properties[_qp][22]; // Dislocation line generation constant
-  R_c = _properties[_qp][23];  // Critical capture radius for dislocation annihilation
-  k_ann = _properties[_qp][24];  // Dislocation evolution annihilation constant
-  k_dyn = _properties[_qp][25];  // Immobile dislocation evolution dynamic recovery constant
-  k_bs1 = _properties[_qp][26];  // Backstress evolution constant 1
-  k_bs2 = _properties[_qp][27];  // Backstress evolution constant 2
+  rho_m_zero = _properties[_qp][21];  // Initial mobile dislocation density
+  rho_i_zero = _properties[_qp][22];  // Initial immobile dislocation density
+  d_disl_zero = _properties[_qp][23];  // Initial dislocation line length
+  k_mul = _properties[_qp][24]; // Dislocation line generation constant
+  R_c = _properties[_qp][25];  // Critical capture radius for dislocation annihilation
+  k_ann = _properties[_qp][26];  // Dislocation evolution annihilation constant
+  k_dyn = _properties[_qp][27];  // Immobile dislocation evolution dynamic recovery constant
+  k_bs1 = _properties[_qp][28];  // Backstress evolution constant 1
+  k_bs2 = _properties[_qp][29];  // Backstress evolution constant 2
 
   B_k = 1.3806503e-23;  // Boltzmann constant
   freq = 1e13;  // Debye frequency

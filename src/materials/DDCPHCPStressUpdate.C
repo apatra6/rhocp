@@ -865,15 +865,8 @@ void DDCPHCPStressUpdate::computeQpStress()
     std::vector<std::vector<Real>> temp1_inv((_num_slip_sys - _num_twin_sys), std::vector<Real>((_num_slip_sys - _num_twin_sys)));
     int isingular = 0;
 
-    // Method 1: Numerical recipes method: fort_inverse
-    fort_inverse(_num_slip_sys - _num_twin_sys, temp1, temp1_inv, isingular);
-    if (isingular == 1){
-      throw MooseException("temp1_inv: Singularity in matrix inversion");
-      return;
-    }
-
-//       // Method 2: MatrixTools inverse
-//       MatrixTools::inverse (temp1_matrix,temp1_inv_matrix);
+    // Method 2: MatrixTools inverse
+    MatrixTools::inverse (temp1,temp1_inv);
 
     for(unsigned int ia = 0; ia < (_num_slip_sys - _num_twin_sys); ia++) {
       for(unsigned int ib = 0; ib < (_num_slip_sys - _num_twin_sys); ib++) {
@@ -966,10 +959,18 @@ void DDCPHCPStressUpdate::computeQpStress()
     }
 
     // Solve for increment of gamma_dot
-    std::vector<int> index(_num_slip_sys);
     std::vector<Real> d_gamma_dot(_num_slip_sys);
-    LU_Decomp(_num_slip_sys,array3,index,isingular);
-    LU_BackSub(_num_slip_sys,array3,index,d_gamma_dot);
+
+    std::vector<std::vector<Real>> array3_inv(_num_slip_sys, std::vector<Real>(_num_slip_sys));
+
+    MatrixTools::inverse(array3,array3_inv);
+
+    for(unsigned int j = 0; j < _num_slip_sys; j++) {
+      d_gamma_dot[j] = 0.0;
+      for(unsigned int i = 0; i < _num_slip_sys; i++) {
+        d_gamma_dot[j] = d_gamma_dot[j] - array3_inv[j][i]*residual[i];
+      }
+    }
 
     // Check to make sure that N-R step leads 'down hill' the sse surface
     Real sum1 = 0.0;
@@ -1250,16 +1251,8 @@ void DDCPHCPStressUpdate::computeQpStress()
     }
   }
 
-  // Method 1: fort_inverse
-  int isingular = 0;
-  fort_inverse(6, array4_matrix, array4_inv_matrix, isingular);
-  if (isingular == 1){
-    throw MooseException("array4_matrix: Singularity in matrix inversion");
-    return;
-  }
-
-//   // Method 2: MatrixTools::inverse
-//   MatrixTools::inverse(array4_matrix,array4_inv_matrix);
+  // Method 2: MatrixTools::inverse
+  MatrixTools::inverse(array4_matrix,array4_inv_matrix);
 
   for (unsigned int i = 0; i < 6; i++) {
     for (unsigned int j = 0; j < 6; j++) {
@@ -1738,7 +1731,10 @@ void DDCPHCPStressUpdate::readPropsFile() {
 
   // Assign slip system normals and slip directions for a BCC material
   for (unsigned int i = 0; i < _num_props; i++) {
-    file_prop >> _properties[_qp][i];
+    // file_prop >> _properties[_qp][i];
+    if (!(file_prop >> _properties[_qp][i])) {
+      mooseError("Required number of material parameters not supplied for crystal plasticity model");
+    }
   }
 
   file_prop.close();
@@ -1748,12 +1744,25 @@ void DDCPHCPStressUpdate::assignProperties(){
 
   // Elastic constants
   C11 = _properties[_qp][0];
-  C12 = _properties[_qp][1];
-  C13 = _properties[_qp][2];
-  C33 = _properties[_qp][3];
-  C44 = _properties[_qp][4];
-  G = _properties[_qp][5];
-  ca_ratio = _properties[_qp][6];
+  C11_perK = _properties[_qp][1];
+  C12 = _properties[_qp][2];
+  C12_perK = _properties[_qp][3];
+  C13 = _properties[_qp][4];
+  C13_perK = _properties[_qp][5];
+  C33 = _properties[_qp][6];
+  C33_perK = _properties[_qp][7];
+  C44 = _properties[_qp][8];
+  C44_perK = _properties[_qp][9];
+  G = _properties[_qp][10];
+  G_perK = _properties[_qp][11];
+  ca_ratio = _properties[_qp][12];
+
+  C11 = C11 - C11_perK*_temp[_qp];
+  C12 = C12 - C12_perK*_temp[_qp];
+  C13 = C13 - C13_perK*_temp[_qp];
+  C33 = C33 - C33_perK*_temp[_qp];
+  C44 = C44 - C44_perK*_temp[_qp];
+  G = G - G_perK*_temp[_qp];
 
   // Slip system specific params
   // Index 1: Basal (0001)<1120> - 3 slip systems: 1-3
@@ -1764,45 +1773,45 @@ void DDCPHCPStressUpdate::assignProperties(){
 
   // Parameters for slip systems
   for (unsigned int i=0; i<4; i++){
-  b_mag[i] = _properties[_qp][6 + 22*i + 1];  // Burgers vector magnitude
+  b_mag[i] = _properties[_qp][12 + 22*i + 1];  // Burgers vector magnitude
 
   // Flow parameters
-  gammadot0g[i] = _properties[_qp][6 + 22*i + 2];  // reference strain rate
-  enthalpy_const[i] = _properties[_qp][6 + 22*i + 3];  // Multiplication constant for enthalpy term
-  p[i] = _properties[_qp][6 + 22*i + 4];  // Shape parameter (dislocation glide)
-  q[i] = _properties[_qp][6 + 22*i + 5];  // Shape parameter (dislocation glide)
+  gammadot0g[i] = _properties[_qp][12 + 22*i + 2];  // reference strain rate
+  enthalpy_const[i] = _properties[_qp][12 + 22*i + 3];  // Multiplication constant for enthalpy term
+  p[i] = _properties[_qp][12 + 22*i + 4];  // Shape parameter (dislocation glide)
+  q[i] = _properties[_qp][12 + 22*i + 5];  // Shape parameter (dislocation glide)
 
   // Hardening parameters
-  tau0[i] = _properties[_qp][6 + 22*i + 6];  // Athermal slip resistance constant
-  hp_coeff[i] = _properties[_qp][6 + 22*i + 7];  // Hall-Petch coefficient <TBA>
-  grain_size[i] = _properties[_qp][6 + 22*i + 8];  // Grain size (for Hall-Petch term) <TBA>
+  tau0[i] = _properties[_qp][12 + 22*i + 6];  // Athermal slip resistance constant
+  hp_coeff[i] = _properties[_qp][12 + 22*i + 7];  // Hall-Petch coefficient <TBA>
+  grain_size[i] = _properties[_qp][12 + 22*i + 8];  // Grain size (for Hall-Petch term) <TBA>
 
-  frictional_stress[i] = _properties[_qp][6 + 22*i + 9]; // Lattice frictional resistance
-  p0[i] = _properties[_qp][6 + 22*i + 10];  // Dislcoation barrier strength
-  q_t[i] = _properties[_qp][6 + 22*i + 11];  // Taylor hardening parameter
-  x_d[i] = _properties[_qp][6 + 22*i + 12];  // Mean free path constant (dislocation network)
+  frictional_stress[i] = _properties[_qp][12 + 22*i + 9]; // Lattice frictional resistance
+  p0[i] = _properties[_qp][12 + 22*i + 10];  // Dislcoation barrier strength
+  q_t[i] = _properties[_qp][12 + 22*i + 11];  // Taylor hardening parameter
+  x_d[i] = _properties[_qp][12 + 22*i + 12];  // Mean free path constant (dislocation network)
 
-  Alatent[i] = _properties[_qp][6 + 22*i + 13];  // Latent hardening coefficient
+  Alatent[i] = _properties[_qp][12 + 22*i + 13];  // Latent hardening coefficient
 
   // Dislocation evolution parameters
-  rho_m_zero[i] = _properties[_qp][6 + 22*i + 14];  // Initial mobile dislocation density
-  rho_i_zero[i] = _properties[_qp][6 + 22*i + 15];  // Initial immobile dislocation density
-  d_disl_zero[i] = _properties[_qp][6 + 22*i + 16];  // Initial dislocation line length
-  k_mul[i] = _properties[_qp][6 + 22*i + 17]; // Dislocation line generation constant
-  R_c[i] = _properties[_qp][6 + 22*i + 18];  // Critical capture radius for dislocation annihilation
-  k_ann[i] = _properties[_qp][6 + 22*i + 19];  // Dislocation evolution annihilation constant
-  k_dyn[i] = _properties[_qp][6 + 22*i + 20];  // Immobile dislocation evolution dynamic recovery constant
-  k_bs1[i] = _properties[_qp][6 + 22*i + 21];  // Backstress evolution constant 1
-  k_bs2[i] = _properties[_qp][6 + 22*i + 22];  // Backstress evolution constant 2
+  rho_m_zero[i] = _properties[_qp][12 + 22*i + 14];  // Initial mobile dislocation density
+  rho_i_zero[i] = _properties[_qp][12 + 22*i + 15];  // Initial immobile dislocation density
+  d_disl_zero[i] = _properties[_qp][12 + 22*i + 16];  // Initial dislocation line length
+  k_mul[i] = _properties[_qp][12 + 22*i + 17]; // Dislocation line generation constant
+  R_c[i] = _properties[_qp][12 + 22*i + 18];  // Critical capture radius for dislocation annihilation
+  k_ann[i] = _properties[_qp][12 + 22*i + 19];  // Dislocation evolution annihilation constant
+  k_dyn[i] = _properties[_qp][12 + 22*i + 20];  // Immobile dislocation evolution dynamic recovery constant
+  k_bs1[i] = _properties[_qp][12 + 22*i + 21];  // Backstress evolution constant 1
+  k_bs2[i] = _properties[_qp][12 + 22*i + 22];  // Backstress evolution constant 2
   }
 
   // Parameters for twin systems
-  tau_twin = _properties[_qp][95]; // threshold stress for twin
-  drag_twin = _properties[_qp][96]; // drag stress for twin
-  gd0twin = _properties[_qp][97]; // reference shear rate for twin
-  exp_twin = _properties[_qp][98]; // rate exponent for twin
-  gamma_twin = _properties[_qp][99]; // characteristic shear strain for twin
-  twin_frac_reorient = _properties[_qp][100]; // twin fraction at which reorientation occurs
+  tau_twin = _properties[_qp][101]; // threshold stress for twin
+  drag_twin = _properties[_qp][102]; // drag stress for twin
+  gd0twin = _properties[_qp][103]; // reference shear rate for twin
+  exp_twin = _properties[_qp][104]; // rate exponent for twin
+  gamma_twin = _properties[_qp][105]; // characteristic shear strain for twin
+  twin_frac_reorient = _properties[_qp][106]; // twin fraction at which reorientation occurs
 
   B_k = 1.3806503e-23;  // Boltzmann constant
   freq = 1e13;  // Debye frequency
@@ -2051,188 +2060,5 @@ Real DDCPHCPStressUpdate::max_val(Real a, Real b)
   else
   {
     return b;
-  }
-}
-
-// These functions are used to calculate the inverse of n-dimensional 2D matrices
-// These algorithms are based on Numerical Recipes: The Art of Scientific Computing (http://numerical.recipes/)
-void DDCPHCPStressUpdate::fort_inverse(int n, std::vector<std::vector<Real>> &a, std::vector<std::vector<Real>> &b, int &isingular)
-{
-  std::vector<std::vector<Real>> c_mat(n, std::vector<Real>(n));
-  std::vector<int> index(n);
-  std::vector<Real> vec(n);
-
-  isingular=0;
-  for(int i=0;i<n;i++)
-  {
-    for(int j=0;j<n;j++)
-    {
-      c_mat[i][j]=a[i][j];
-    //  cout<<c[i][j]<<"\t";
-    }
-  }
-  for(int i=0;i<n;i++)
-  {
-    for(int j=0;j<n;j++)
-    {
-      b[i][j]=0.0;
-    }
-    b[i][i]=1.0;
-  }
-
-  // LU_Decomp(n,c_mat,index,isingular);
-  LU_Decomp(n,c_mat,index,isingular);
-
-  if (isingular==1)
-  {
-    //this is alternative to break
-    return;
-  }
-
-  for(int j=0;j<n;j++)
-  {
-    for (int k=0;k<n;k++)
-    {
-      vec[k]=b[k][j];
-    }
-
-    LU_BackSub(n,c_mat,index,vec);
-
-    for (int k=0;k<n;k++)
-    {
-      b[k][j]=vec[k];
-    }
-  }
-}
-
-void DDCPHCPStressUpdate::LU_Decomp(int n,std::vector<std::vector<Real>> &c, std::vector<int> &index, int &isingular)
-{
-  Real tiny=1e-20;
-  Real a_max=0.0;
-  std::vector<Real> v(n);
-  Real sum1=0.0,dummy=0.0;
-  int imax;
-
-  //Loop over rows
-  for(int i=0;i<n;i++)
-  {
-    a_max = 0.0;
-    for(int j=0;j<n;j++)
-    {
-      a_max=max_val(a_max,c[i][j]);
-     // cout<<a_max<<"\t";
-    }
-    if(a_max==0)
-    {
-      isingular=1;
-      //this is alternative to break
-      return ;
-    }
-    v[i]=1/a_max;
-   // cout<<"\n";
-  }
-
-  sum1=0.0;
-  //Begin big loop over all the columns.
-  for(int j=0;j<n;j++)
-  {
-    for(int i=0;i<=j-1;i++)
-    {
-      sum1 = c[i][j];
- //     cout<<sum1<<"\t"<<i<<"\t"<<j<<"\n";
-      for(int k=0;k<=i-1;k++)
-      {
-        sum1 = sum1 - c[i][k] * c[k][j];
-      }
-      c[i][j]=sum1;
-    }
-
-    a_max=0.0;
-    for(int i=j;i<n;i++)
-    {
-      sum1=c[i][j];
-      for(int k=0;k<=j-1;k++)
-      {
-        sum1 = sum1 - c[i][k] * c[k][j];
-      }
-      c[i][j]=sum1;
-      dummy = v[i] * abs(sum1);
-
-      if (dummy>a_max)
-      {
-        imax=i;
-        a_max=dummy;
-      }
-    }
-
-    //pivoting of rows
-    if (j!=imax)
-    {
-      for(int k=0;k<n;k++)
-      {
-        dummy=c[imax][k];
-        c[imax][k]=c[j][k];
-        c[j][k]=dummy;
-      }
-      v[imax]=v[j];
-    }
-    index[j]=imax;
-
-    // divide by the pivot element
-    if(c[j][j]==0.0) c[j][j]=tiny;
-
-    if (j!=n)
-    {
-      dummy=1.0/c[j][j];
-      for(int i=j+1;i<n;i++)
-      {
-        c[i][j]=c[i][j] * dummy;
-      }
-    }
-    isingular=0;
-  }
-
-}
-
-void DDCPHCPStressUpdate::LU_BackSub(int n, std::vector<std::vector<Real>> &c, std::vector<int> &index, std::vector<Real> &vec)
-{
-  int ii=0;
-  Real sum1=0.0;
-  //Real b[n];
-  int m;
-
-  //forward substitution
-  for(int i=0;i<n;i++)
-  {
-    m=index[i];
-    sum1 = vec[m];
-    vec[m]=vec[i];
-    if(ii!=0)
-    {
-      for(int j=ii;j<i-1;j++)
-      {
-        sum1 = sum1 - c[i][j] * vec[j];
-      }
-    }
-    else if(sum1!=0.0)
-    {
-      ii=i;
-    }
-    vec[i]=sum1;
-  }
-
-  //backward substitution
-  for(int i=n-1;i>=0;i--)
-  {
-    sum1 = vec[i];
-    if (i<n-1)
-    {
-      for(int j=i+1;j<n;j++)
-      {
-        sum1 = sum1 - c[i][j] * vec[j];
-      }
-    }
-
-    vec[i] = sum1/c[i][i];
   }
 }

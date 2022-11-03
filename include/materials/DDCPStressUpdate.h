@@ -82,7 +82,7 @@ protected:
   Real act_vol;
   Real delF0;
 
-  Real C11, C11_perK, C12, C12_perK, C44, C44_perK, G, b_mag, gammadot0g, enthalpy_const, p, q, p0, tau0, hp_coeff, grain_size, frictional_stress, q_t, x_d, Alatent, rho_m_zero, rho_i_zero, d_disl_zero, k_mul, R_c, k_ann, k_dyn, k_bs1, k_bs2, B_k, freq;
+  Real C11, C11_perK, C12, C12_perK, C44, C44_perK, G, G_perK, b_mag, gammadot0g, enthalpy_const, p, q, p0, tau0, hp_coeff, grain_size, frictional_stress, q_t, x_d, Alatent, rho_m_zero, rho_i_zero, d_disl_zero, k_mul, R_c, k_ann, k_dyn, k_bs1, k_bs2, B_k, freq;
 
   Real sse;
 };
