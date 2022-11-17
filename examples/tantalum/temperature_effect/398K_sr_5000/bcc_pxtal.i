@@ -1,6 +1,5 @@
 [Mesh]
   displacements = 'disp_x disp_y disp_z'
-  construct_side_list_from_node_list = true
   [./fmg]
     type = FileMeshGenerator
     file = 64grains_512elems.e

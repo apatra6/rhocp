@@ -1606,12 +1606,12 @@ void DDCPHCPStressUpdate::NR_residual (unsigned int num_slip_sys, unsigned int n
 
   for(unsigned int ia = 0; ia < (num_slip_sys - num_twin_sys); ia++) {
     rho_m[ia] = rho_m0[ia] + drhomdt[ia]*dt;
-    if(rho_m[ia] < 1.0e5) {
-      rho_m[ia] = 1.0e5;
+    if(rho_m[ia] < 1.0e2) {
+      rho_m[ia] = 1.0e2;
     }
     rho_i[ia] = rho_i0[ia] + drhoidt[ia]*dt;
-    if(rho_i[ia] < 1.0e5) {
-      rho_i[ia] = 1.0e5;
+    if(rho_i[ia] < 1.0e2) {
+      rho_i[ia] = 1.0e2;
     }
   }
 
@@ -1765,11 +1765,11 @@ void DDCPHCPStressUpdate::assignProperties(){
   G = G - G_perK*_temp[_qp];
 
   // Slip system specific params
-  // Index 1: Basal (0001)<1120> - 3 slip systems: 1-3
-  // Index 2: Prismatic {1010}<1120> - 3 slip systems: 4-6
-  // Index 3: Pyramidal {1011}<1120> - 6 slip systems: 6-12
-  // Index 4: Pyramidal <c+a> {1122}<1123> - 6 slip systems: 13-18
-  // Index 5: Pyramidal <c+a> twin {1012}<1011> - 6 pseudo-slip systems: 19-24
+  // Index 0: Basal (0001)<1120> - 3 slip systems: 1-3
+  // Index 1: Prismatic {1010}<1120> - 3 slip systems: 4-6
+  // Index 2: Pyramidal {1011}<1120> - 6 slip systems: 6-12
+  // Index 3: Pyramidal <c+a> {1122}<1123> - 6 slip systems: 13-18
+  // Index 4: Pyramidal <c+a> twin {1012}<1011> - 6 pseudo-slip systems: 19-24
 
   // Parameters for slip systems
   for (unsigned int i=0; i<4; i++){

@@ -1364,12 +1364,12 @@ void DDCPStressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::
 
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
     rho_m[ia] = rho_m0[ia] + drhomdt[ia]*dt;
-    if(rho_m[ia] < 1.0e5) {
-      rho_m[ia] = 1.0e5;
+    if(rho_m[ia] < 1.0e2) {
+      rho_m[ia] = 1.0e2;
     }
     rho_i[ia] = rho_i0[ia] + drhoidt[ia]*dt;
-    if(rho_i[ia] < 1.0e5) {
-      rho_i[ia] = 1.0e5;
+    if(rho_i[ia] < 1.0e2) {
+      rho_i[ia] = 1.0e2;
     }
   }
 
