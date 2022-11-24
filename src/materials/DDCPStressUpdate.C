@@ -702,7 +702,6 @@ void DDCPStressUpdate::computeQpStress()
     }
 
     // backstress
-    // TODO
     for(unsigned int ia = 0; ia < _num_slip_sys; ia++) {
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
         dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1*(0.5*(q_t*G*b_mag)/sqrt(rho_m[ia] + rho_i[ia]))*dt_incr*(drhomdgb[ia][ib] + drhoidgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
@@ -745,8 +744,8 @@ void DDCPStressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
         array3[ia][ib] = -gamma_dot_g[ia]*(p*q*(delF0/B_k/_temp[_qp])*power(1.e0 - power((abs(tau_eff[ia])
             - s_a[ia])/s_t[ia], p), q - 1)*power((abs(tau_eff[ia]) - s_a[ia])/s_t[ia], p - 1))*
-          ((dTaudGd[ia][ib]*sgn(tau[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_t[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
-      } // TODO
+          (((dTaudGd[ia][ib] - dbsdgb[ia][ib])*sgn(tau_eff[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_t[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
+      }
       array3[ia][ia] = array3[ia][ia] + 1;
     }
 

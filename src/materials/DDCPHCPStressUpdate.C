@@ -934,7 +934,7 @@ void DDCPHCPStressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < (_num_slip_sys - _num_twin_sys); ib++) {
         array3[ia][ib] = -gamma_dot_g[ia]*(p[isx(ia)]*q[isx(ia)]*(delF0/B_k/_temp[_qp])*power(1.e0 - power((abs(tau_eff[ia])
             - s_a[ia])/s_t[ia], p[isx(ia)]), q[isx(ia)] - 1)*power((abs(tau_eff[ia]) - s_a[ia])/s_t[ia], p[isx(ia)] - 1))*
-          ((dTaudGd[ia][ib]*sgn(tau[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_t[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
+          (((dTaudGd[ia][ib] - dbsdgb[ia][ib])*sgn(tau[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_t[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
       }
       array3[ia][ia] = array3[ia][ia] + 1;
     }
@@ -1177,7 +1177,7 @@ void DDCPHCPStressUpdate::computeQpStress()
 
           // twin systems
           for (unsigned int n = (_num_slip_sys - _num_twin_sys); n < _num_slip_sys; n++) {
-            ddpdsig[i][j][k][l] = ddpdsig[i][j][k][l] + (xs[i][n]*xm[j][n] + xm[i][n]*xs[j][n])*(((xs[k][n]*xm[l][n] + xm[k][n]*xs[l][n])*(exp_twin*gamma_dot_g[n]/std::max(tau[n] - tau_twin,1.e-9))));
+            ddpdsig[i][j][k][l] = ddpdsig[i][j][k][l] + (xs[i][n]*xm[j][n])*(((xs[k][n]*xm[l][n])*(exp_twin*gamma_dot_g[n]/std::max(tau[n] - tau_twin,1.e-9))));
           }
         }
       }

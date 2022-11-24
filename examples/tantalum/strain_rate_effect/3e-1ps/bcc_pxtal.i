@@ -301,7 +301,7 @@
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
     temp = 298 # K
-    tol = 1e-5 # this tolerance is for crystallographic shearing rate and needs to be adjusted according to applied strain rate
+    tol = 5e-5 # this tolerance is for crystallographic shearing rate and needs to be adjusted according to applied strain rate
     EulerAngFileReader = euler_angle
   [../]
   [./elasticity_tensor]

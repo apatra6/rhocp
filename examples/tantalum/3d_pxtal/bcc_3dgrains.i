@@ -44,55 +44,55 @@
 
 [AuxVariables]
   [./strain_xx]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./strain_yy]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./strain_zz]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./stress_xx]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./stress_yy]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./stress_zz]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./vonmises]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./phi_1]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./Phi]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./phi_2]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./rho_m]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./rho_i]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./Ep_eff]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   [../]
   [./eeq]
@@ -301,7 +301,7 @@
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
     temp = 114 # K
-    tol = 5e-7
+    tol = 2e-6
     EulerAngFileReader = euler_angle
   [../]
   [./elasticity_tensor]
@@ -333,7 +333,7 @@
   nl_forced_its = 1
   l_max_its = 10
   start_time = 0.0
-  end_time = 50.0
+  end_time = 300.0
 
   [./TimeStepper]
     type = FunctionDT
@@ -416,7 +416,7 @@
   interval = 10
   [./exodus]
    type = Exodus
-   interval = 100
+   interval = 50
   [../]
   [./cp]
     type = Checkpoint
