@@ -666,7 +666,7 @@ void DDCPStressUpdate::computeQpStress()
       }
       dldrhom[ia][ia] = - 0.5*pow(d_disl[ia],2.0)*H[ia][ia]/sqrt(sum1);
 
-      temp2[ia][ia] = temp2[ia][ia] + (k_mul/b_mag/d_disl[ia] - 1.0/b_mag/d_disl[ia]
+      temp2[ia][ia] = temp2[ia][ia] + (k_mul/b_mag/d_disl[ia] - x_d/b_mag/d_disl[ia]
                         - (k_ann*R_c*rho_m[ia]/b_mag))*(sgn(gamma_dot[ia])*dt_incr);
 
       temp1[ia][ia] = temp1[ia][ia] + 1.0 + (k_mul/b_mag/pow(d_disl[ia], 2))*dldrhom[ia][ia]*abs(gamma_dot[ia])
@@ -744,7 +744,7 @@ void DDCPStressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
         array3[ia][ib] = -gamma_dot_g[ia]*(p*q*(delF0/B_k/_temp[_qp])*power(1.e0 - power((abs(tau_eff[ia])
             - s_a[ia])/s_t[ia], p), q - 1)*power((abs(tau_eff[ia]) - s_a[ia])/s_t[ia], p - 1))*
-          (((dTaudGd[ia][ib] - dbsdgb[ia][ib])*sgn(tau_eff[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_t[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
+          (((dTaudGd[ia][ib] - dbsdgb[ia][ib])*sgn(tau_eff[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_a[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
       }
       array3[ia][ia] = array3[ia][ia] + 1;
     }

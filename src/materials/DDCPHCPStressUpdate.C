@@ -857,7 +857,7 @@ void DDCPHCPStressUpdate::computeQpStress()
       }
       dldrhom[ia][ia] = - 0.5*pow(d_disl[ia],2.0)*H[ia][ia]/sqrt(sum1);
 
-      temp2[ia][ia] = temp2[ia][ia] + (k_mul[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - 1.0/b_mag[isx(ia)]/d_disl[ia] - (k_ann[isx(ia)]*R_c[isx(ia)]*rho_m[ia]/b_mag[isx(ia)]))*(sgn(gamma_dot[ia])*dt_incr);
+      temp2[ia][ia] = temp2[ia][ia] + (k_mul[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - x_d[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - (k_ann[isx(ia)]*R_c[isx(ia)]*rho_m[ia]/b_mag[isx(ia)]))*(sgn(gamma_dot[ia])*dt_incr);
 
       temp1[ia][ia] = temp1[ia][ia] + 1.0 + (k_mul[isx(ia)]/b_mag[isx(ia)]/pow(d_disl[ia], 2))*dldrhom[ia][ia]*abs(gamma_dot[ia])*dt_incr + k_ann[isx(ia)]*R_c[isx(ia)]*abs(gamma_dot[ia])*dt_incr/b_mag[isx(ia)] + 0.5*x_d[isx(ia)]*H[ia][ia]*abs(gamma_dot[ia])*dt_incr/sqrt(sum1)/b_mag[isx(ia)];
     }
@@ -934,7 +934,7 @@ void DDCPHCPStressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < (_num_slip_sys - _num_twin_sys); ib++) {
         array3[ia][ib] = -gamma_dot_g[ia]*(p[isx(ia)]*q[isx(ia)]*(delF0/B_k/_temp[_qp])*power(1.e0 - power((abs(tau_eff[ia])
             - s_a[ia])/s_t[ia], p[isx(ia)]), q[isx(ia)] - 1)*power((abs(tau_eff[ia]) - s_a[ia])/s_t[ia], p[isx(ia)] - 1))*
-          (((dTaudGd[ia][ib] - dbsdgb[ia][ib])*sgn(tau[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_t[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
+          (((dTaudGd[ia][ib] - dbsdgb[ia][ib])*sgn(tau[ia]) - dsadgb[ia][ib])/s_t[ia] - (abs(tau_eff[ia]) - s_a[ia])*dstdgb[ia][ib]/(s_t[ia]*s_t[ia]));
       }
       array3[ia][ia] = array3[ia][ia] + 1;
     }
