@@ -174,7 +174,7 @@ void DDCPStressUpdate::computeQpStress()
 
   // read in Euler angles
   if (_EBSDFileReader){
-      Point p = _current_elem->centroid();
+      Point p = _current_elem->true_centroid();
       EBSDAccessFunctors::EBSDPointData data = _EBSDFileReader->getData(p);
       _grainid = data._feature_id;
       if (_t_step <= 1){

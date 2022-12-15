@@ -31,7 +31,7 @@ GrainAverageValue::initialize()
 void
 GrainAverageValue::execute()
 {
-  Point p = _current_elem->centroid();
+  Point p = _current_elem->true_centroid();
   EBSDAccessFunctors::EBSDPointData data = _EBSDFileReader->getData(p);
   unsigned int current_gr_id = data._feature_id;
 

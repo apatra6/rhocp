@@ -32,7 +32,7 @@ AssignSubdomainIDfromFeature::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   for (auto & elem : mesh->element_ptr_range()){
-      const EBSDAccessFunctors::EBSDPointData & d = getData(elem->centroid());
+      const EBSDAccessFunctors::EBSDPointData & d = getData(elem->true_centroid());
       _subdomain_id = d._feature_id;
       elem->subdomain_id() = _subdomain_id;
   }
