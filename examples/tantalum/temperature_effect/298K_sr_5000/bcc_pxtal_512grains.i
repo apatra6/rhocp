@@ -1,9 +1,8 @@
 [Mesh]
   displacements = 'disp_x disp_y disp_z'
-  construct_side_list_from_node_list = true
   [./fmg]
     type = FileMeshGenerator
-    file = 64grains_512elems.e
+    file = 512grains_4096elems.e
   [../]
   [./bot_corner]
     type = ExtraNodesetGenerator
@@ -213,7 +212,7 @@
 [UserObjects]
   [./euler_angle]
     type = EulerAngleReader
-    file_name = orientations.in
+    file_name = orientations512.in
     execute_on = 'initial'
   [../]
 []
@@ -221,7 +220,7 @@
 [Functions]
   [./top_push]
     type = ParsedFunction
-    value = '-0.4*5000' # 0.4 is the sample dimension, 5000/s is the strain rate
+    value = '-0.8*5000' # 0.8 is the sample dimension, 5000/s is the strain rate
   [../]
 
   [./dts]
@@ -280,7 +279,7 @@
   [../]
 
   # compressive loading along y-direction
-  [./y_pull_function]
+  [./y_push_function]
     type = PresetVelocity
     variable = disp_y
     boundary = yp_face
@@ -301,8 +300,8 @@
     num_slip_sys = 24
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
-    temp = 398 # K
-    tol = 1e-2
+    temp = 298 # K
+    tol = 5e-2
     EulerAngFileReader = euler_angle
   [../]
   [./elasticity_tensor]
@@ -411,7 +410,7 @@
 []
 
 [Outputs]
-  file_base = out_398K
+  file_base = out_298K
   csv = true
   print_linear_residuals = true
   perf_graph = true

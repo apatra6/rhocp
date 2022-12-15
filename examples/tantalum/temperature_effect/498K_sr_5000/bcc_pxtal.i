@@ -1,5 +1,6 @@
 [Mesh]
   displacements = 'disp_x disp_y disp_z'
+  construct_side_list_from_node_list = true
   [./fmg]
     type = FileMeshGenerator
     file = 64grains_512elems.e
@@ -218,9 +219,9 @@
 []
 
 [Functions]
-  [./top_pull]
+  [./top_push]
     type = ParsedFunction
-    value = '0.4*5000' # 0.4 is the sample dimension, 5000/s is the strain rate
+    value = '-0.4*5000' # 0.4 is the sample dimension, 5000/s is the strain rate
   [../]
 
   [./dts]
@@ -278,12 +279,12 @@
     value = 0.0
   [../]
 
-  # tensile loading along y-direction
+  # compressive loading along y-direction
   [./y_pull_function]
     type = PresetVelocity
     variable = disp_y
     boundary = yp_face
-    function = top_pull
+    function = top_push
   [../]
 []
 
@@ -300,7 +301,7 @@
     num_slip_sys = 24
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
-    temp = 498 # K
+    temp = 398 # K
     tol = 1e-2
     EulerAngFileReader = euler_angle
   [../]
@@ -410,7 +411,7 @@
 []
 
 [Outputs]
-  file_base = out_498K
+  file_base = out_398K
   csv = true
   print_linear_residuals = true
   perf_graph = true

@@ -334,7 +334,7 @@
   l_max_its = 10
 
   start_time = 0.0
-  end_time = 4.0e-4
+  end_time = 4.0e-5
 
   [./TimeStepper]
     type = FunctionDT
