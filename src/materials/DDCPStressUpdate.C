@@ -172,29 +172,28 @@ void DDCPStressUpdate::computeQpStress()
   }
   assignProperties();
 
+  if (_t_step <= 1) {
   // read in Euler angles
   if (_EBSDFileReader){
-      Point p = _current_elem->true_centroid();
+      Point p = _current_elem->vertex_average();
       EBSDAccessFunctors::EBSDPointData data = _EBSDFileReader->getData(p);
       _grainid = data._feature_id;
-      if (_t_step <= 1){
-              psi[0] = data._phi1;
-              psi[1] = data._Phi;
-              psi[2] = data._phi2;
-      }
+
+      psi[0] = data._phi1;
+      psi[1] = data._Phi;
+      psi[2] = data._phi2;
   }
   else if(_EulerAngFileReader){
       if (_grainid == -1){
           _grainid = _current_elem->subdomain_id();
       }
-      if (_t_step <= 1){
-          psi[0] = _EulerAngFileReader->getData(_grainid,0);
-          psi[1] = _EulerAngFileReader->getData(_grainid,1);
-          psi[2] = _EulerAngFileReader->getData(_grainid,2);
-      }
+      psi[0] = _EulerAngFileReader->getData(_grainid,0);
+      psi[1] = _EulerAngFileReader->getData(_grainid,1);
+      psi[2] = _EulerAngFileReader->getData(_grainid,2);
   }
   else{
       mooseError("Euler angle data not found.");
+  }
   }
 
   // Initialize Kronecker delta tensor

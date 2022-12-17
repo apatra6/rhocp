@@ -27,7 +27,7 @@ EBSDMeshReaderPointDataAux::precalculateValue()
 {
   // EBSD data is defined at element centroids, so this only makes
   // sense as an Element AuxKernel
-  Point p = _current_elem->true_centroid();
+  Point p = _current_elem->vertex_average();
 
   _value = (*_val)(_ebsd_reader.getData(p));
 }

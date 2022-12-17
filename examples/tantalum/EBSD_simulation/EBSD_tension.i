@@ -5,10 +5,10 @@
     type = EBSDMeshGenerator
     filename = 'tantalum_input_1_layer_new.txt'
   []
-  [./bottom_nodes]
+  [./bottom_center]
     type = ExtraNodesetGenerator
-    new_boundary = bottom_nodes
-    coord = '0.0  0.0  0.0'
+    new_boundary = bottom_center
+    coord = '675.0  0.0  0.0'
     input = emg
   [../]
   [./add_side_sets]
@@ -21,7 +21,7 @@
                0  0  -1'
     fixed_normal = false
     new_boundary = 'xp_face yp_face zp_face xn_face yn_face zn_face'
-    input= bottom_nodes
+    input= bottom_center
   [../]  
 []
 
@@ -56,6 +56,10 @@
     order = FIRST
     family = MONOMIAL
   [../]
+  [./strain_xy]
+    order = FIRST
+    family = MONOMIAL
+  [../]
   [./stress_xx]
     order = FIRST
     family = MONOMIAL
@@ -65,6 +69,10 @@
     family = MONOMIAL
   [../]
   [./stress_zz]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
     order = FIRST
     family = MONOMIAL
   [../]
@@ -145,6 +153,14 @@
     index_i = 0
     index_j = 0
   [../]
+  [./strain_xy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_xy
+    execute_on = timestep_end
+    index_i = 0
+    index_j = 1
+  [../]
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -168,6 +184,14 @@
     execute_on = timestep_end
     index_i = 0
     index_j = 0
+  [../]
+  [./stress_xy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xy
+    execute_on = timestep_end
+    index_i = 0
+    index_j = 1
   [../]
   [./vonmises]
     type = RankTwoScalarAux
@@ -241,30 +265,36 @@
   [./dts]
     type = PiecewiseLinear
     x = '0       0.01'
-    y = '1e-5    0.001'
+    y = '1e-5    0.005'
   [../]
 []
 
 [BCs]
-
-  [./x_fix]
-    type = DirichletBC
-    variable = disp_x
-    boundary = yn_face
-    value = 0.0
-  [../]
-
-  [./y_fix]
+  [./y_roller]
     type = DirichletBC
     variable = disp_y
     boundary = yn_face
     value = 0.0
   [../]
 
+  [./x_fix]
+    type = DirichletBC
+    variable = disp_x
+    boundary = bottom_center
+    value = 0.0
+  [../]
+
+  [./y_fix]
+    type = DirichletBC
+    variable = disp_y
+    boundary = bottom_center
+    value = 0.0
+  [../]
+
   [./z_fix]
     type = DirichletBC
     variable = disp_z
-    boundary = yn_face
+    boundary = bottom_center
     value = 0.0
   [../]
 
@@ -290,7 +320,7 @@
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
     temp = 298 # K
-    tol = 1e-6
+    tol = 2e-6
     EBSDFileReader = ebsd_reader
     isEulerBunge = 1
   [../]
@@ -310,30 +340,37 @@
 [Executioner]
   type = Transient
 
-  solve_type = 'NEWTON'
+  # uncomment for implicit solve
+  # solve_type = 'NEWTON'
+  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  # petsc_options_value = 'lu superlu_dist'
+
+  # uncomment for explicit solve
+  scheme = 'explicit-euler'
+  solve_type = 'LINEAR'
+  line_search = 'none'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
-  # line_search = 'none'
 
-  l_tol = 1e-8
-  nl_abs_tol = 1e-7
+  l_tol = 1e-10
+  nl_abs_tol = 5e-6
   nl_rel_tol = 1e-6
-  nl_max_its = 20
+  nl_max_its = 10
   nl_forced_its = 1
-  l_max_its = 10
+  l_max_its = 10000
 
   start_time = 0.0
   end_time = 100.0
+  dt = 0.001
+  dtmax = 0.001
 
-  [./TimeStepper]
-    type = FunctionDT
-    function = dts
-    min_dt = 1e-12
-    cutback_factor_at_failure = 0.2
-    growth_factor = 1.2
-  [../]
+  # [./TimeStepper]
+  #   type = FunctionDT
+  #   function = dts
+  #   min_dt = 1e-12
+  #   cutback_factor_at_failure = 0.2
+  #   growth_factor = 1.2
+  # [../]
 
   [./Predictor]
     type = SimplePredictor
@@ -354,6 +391,10 @@
     type = ElementAverageValue
     variable = strain_xx
   [../]
+  [./strain_xy]
+    type = ElementAverageValue
+    variable = strain_xy
+  [../]
   [./stress_zz]
     type = ElementAverageValue
     variable = stress_zz
@@ -365,6 +406,10 @@
   [./stress_xx]
     type = ElementAverageValue
     variable = stress_xx
+  [../]
+  [./stress_xy]
+    type = ElementAverageValue
+    variable = stress_xy
   [../]
   [./vonmises]
     type = ElementAverageValue
@@ -408,7 +453,7 @@
   interval = 10
   [out]
     type = Checkpoint
-    num_files = 2
+    num_files = 5
     interval = 100
   []
   [./exodus]

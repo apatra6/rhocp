@@ -32,7 +32,7 @@ AssignSubdomainIDfromPhase::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   for (auto & elem : mesh->element_ptr_range()){
-      const EBSDAccessFunctors::EBSDPointData & d = getData(elem->true_centroid());
+      const EBSDAccessFunctors::EBSDPointData & d = getData(elem->vertex_average());
       _subdomain_id = d._phase;
       elem->subdomain_id() = _subdomain_id;
   }
