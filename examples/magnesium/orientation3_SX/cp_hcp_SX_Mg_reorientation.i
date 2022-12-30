@@ -466,6 +466,7 @@
     temp = 300 # K
     tol = 5e-7
     EulerAngFileReader = euler_angle
+    iReorientTwin = 1
   [../]
 []
 
@@ -631,7 +632,7 @@
 []
 
 [Outputs]
-  file_base = out_ori3
+  file_base = out_ori3_reorient
   csv = true
   print_linear_residuals = true
   perf_graph = true

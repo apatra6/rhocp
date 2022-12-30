@@ -329,31 +329,31 @@
   [./g_act_1]
     type = StateVariable
     variable = g_act_1
-    sdv_id = 112
+    sdv_id = 113
     execute_on = timestep_end
   [../]
   [./g_act_2]
     type = StateVariable
     variable = g_act_2
-    sdv_id = 113
+    sdv_id = 114
     execute_on = timestep_end
   [../]
   [./g_act_3]
     type = StateVariable
     variable = g_act_3
-    sdv_id = 114
+    sdv_id = 115
     execute_on = timestep_end
   [../]
   [./g_act_4]
     type = StateVariable
     variable = g_act_4
-    sdv_id = 115
+    sdv_id = 116
     execute_on = timestep_end
   [../]
   [./g_act_5]
     type = StateVariable
     variable = g_act_5
-    sdv_id = 116
+    sdv_id = 117
     execute_on = timestep_end
   [../]
 
@@ -461,8 +461,8 @@
     num_twin_sys = 6
     propsFile = Mg_props.in
     slipSysFile = Mg_slip_sys.in
-    num_state_vars = 116
-    num_props = 107
+    num_state_vars = 117
+    num_props = 109
     temp = 300 # K
     tol = 5e-7
     EulerAngFileReader = euler_angle

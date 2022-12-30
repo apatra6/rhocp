@@ -27,6 +27,7 @@ InputParameters validParams<DDCPHCPStressUpdate>()
   params.addParam<UserObjectName>("EBSDFileReader", "Name of the EBSDReader UO");
   params.addParam<int>("isEulerRadian", 0, "Are Euler angles specified in radians");
   params.addParam<int>("isEulerBunge", 0, "Are Euler angles specified in Bunge notation");
+  params.addParam<unsigned int>("iReorientTwin", 0, "Allow twin reorientation");
   return params;
 }
 
@@ -49,6 +50,7 @@ DDCPHCPStressUpdate::DDCPHCPStressUpdate(const InputParameters & parameters) :
                                : NULL),
     _isEulerRadian(getParam<int>("isEulerRadian")),
     _isEulerBunge(getParam<int>("isEulerBunge")),
+    _iReorientTwin(getParam<unsigned int>("iReorientTwin")),
     _euler_ang(declareProperty<Point>("euler_ang")),
     _state_var(declareProperty<std::vector<Real> >("state_var")),
     _state_var_old(getMaterialPropertyOld<std::vector<Real> >("state_var")),
@@ -138,6 +140,7 @@ void DDCPHCPStressUpdate::computeQpStress()
   std::vector<Real> twin_rate(_num_twin_sys); // rate of twinning
   int itvariant; // twin variant
   Real tot_twin_fraction; // total twin fraction
+  Real gamma_twin_ref; // reference shear strain for twin hardening
   std::vector<Real> tau(_num_slip_sys); // resolved shear stress
   std::vector<Real> tau_eff(_num_slip_sys); // effective resolved shear stress
   std::vector<Real> s_a(_num_slip_sys); // athermal slip resistance
@@ -326,6 +329,8 @@ void DDCPHCPStressUpdate::computeQpStress()
     }
 
     itvariant = -1;
+
+    gamma_twin_ref = 0.e0;
   }
   //  End of initializations.  Read in internal variables
 
@@ -419,6 +424,10 @@ void DDCPHCPStressUpdate::computeQpStress()
     n = n + 1;
     itvariant = _state_var[_qp][n];
 
+    // Read gamma_twin_ref SDV 52 + (_num_slip_sys - _num_twin_sys)*3 + _num_twin_sys
+    n = n + 1;
+    gamma_twin_ref = _state_var[_qp][n];
+
     // std::cout << "\nTotal no. of state vars read:" << n;
   } // End of initializations
 
@@ -447,11 +456,11 @@ void DDCPHCPStressUpdate::computeQpStress()
     }
   }
 
-  // twin reorientation
+  if (_iReorientTwin) {
+  // Calculate total twin fraction
   Real twin_frac_max = 0.0;
   tot_twin_fraction = 0.0;
   unsigned int itwin_max = 100;
-
   for (unsigned int i = 0; i < _num_twin_sys; i++) {
     tot_twin_fraction = tot_twin_fraction + twin_fraction0[i];
     if (twin_fraction0[i] > twin_frac_max) {
@@ -460,6 +469,7 @@ void DDCPHCPStressUpdate::computeQpStress()
     }
   }
 
+  // twin reorientation
   if (tot_twin_fraction >= twin_frac_reorient) {
     RankTwoTensor R_twin, tarray1, tarray2;
 
@@ -510,6 +520,7 @@ void DDCPHCPStressUpdate::computeQpStress()
       twin_fraction0[i] = 0.0;
     }
     itvariant = -1;
+  }
   }
 
   // Initialize ANISOTROPIC 4th rank elastic stiffness tensor
@@ -757,9 +768,68 @@ void DDCPHCPStressUpdate::computeQpStress()
     }
   }
 
+  // twin hardening
+  if (!_iReorientTwin) {
+  // Calculate gamma_ref (reference shear set post reorientation)
+  // (twin systems)
+
+  // Calculate total twin fraction
+  tot_twin_fraction = 0.0;
+
+  for (unsigned int i = 0; i < _num_twin_sys; i++) {
+    tot_twin_fraction = tot_twin_fraction + twin_fraction0[i];
+  }
+
+  // Plastic strain calculations
+  RankTwoTensor F_p;
+  F_p = F_p_inv_0.inverse();
+
+  E_p = F_p.transpose() * F_p;
+  E_p(0,0) = E_p(0,0) - 1.0;
+  E_p(1,1) = E_p(1,1) - 1.0;
+  E_p(2,2) = E_p(2,2) - 1.0;
+  E_p = 0.5 * E_p;
+
+  for (unsigned int k = (_num_slip_sys - _num_twin_sys); k < _num_slip_sys; k++) {
+    unsigned int itwin  = k - _num_slip_sys + _num_twin_sys;
+
+    if (itwin == itvariant && tot_twin_fraction >= twin_frac_reorient && gamma_twin_ref == 0.e0) {
+
+      gamma_twin_ref = 0.e0;
+      for (unsigned int i = 0; i < 3; ++i) {
+        for (unsigned int j = 0; j < 3; ++j) {
+          gamma_twin_ref = gamma_twin_ref + 0.5*(xs[i][k]*xm[j][k] + xs[j][k]*xm[i][k])*E_p(i,j);
+        }
+      }
+    }
+  }
+
+  // Calculate twin hardening
+  for (unsigned int k = (_num_slip_sys - _num_twin_sys); k < _num_slip_sys; k++) {
+    unsigned int itwin  = k - _num_slip_sys + _num_twin_sys;
+    Real gamma_bar = 0.e0;
+
+    if (itwin == itvariant && tot_twin_fraction >= twin_frac_reorient) {
+      for (unsigned int i = 0; i < 3; ++i) {
+        for (unsigned int j = 0; j < 3; ++j) {
+          gamma_bar = gamma_bar + 0.5*(xs[i][k]*xm[j][k] + xs[j][k]*xm[i][k])*E_p(i,j);
+        }
+      }
+    }
+    drag_twin_reorient = drag_twin0 + twin_hard*(power(gamma_bar/gamma_twin_ref,twin_hard_exp) - 1.e0);
+  }
+  }
+
   // TODO twin shearing rate
   for (unsigned int k = (_num_slip_sys - _num_twin_sys); k < _num_slip_sys; k++) {
     unsigned int itwin  = k - _num_slip_sys + _num_twin_sys;
+
+    if (tot_twin_fraction >= twin_frac_reorient && !_iReorientTwin) {
+      drag_twin = drag_twin_reorient;
+    }
+    else {
+      drag_twin = drag_twin0;
+    }
 
     if (TwinAllowed && (itwin == itvariant)){
       if ((tau[k] - tau_twin) >= 1.0e-9){
@@ -1437,6 +1507,10 @@ void DDCPHCPStressUpdate::computeQpStress()
   n = n + 1;
   _state_var[_qp][n] = itvariant;
 
+  // Read gamma_twin_ref SDV 52 + (_num_slip_sys - _num_twin_sys)*3 + _num_twin_sys
+  n = n + 1;
+  _state_var[_qp][n] = gamma_twin_ref;
+
   // Relative deformation system activitiy SDV 56 + (_num_slip_sys - _num_twin_sys)*3 + _num_twin_sys
   Real gtot = 0.0e0;
   std::vector<Real> g_isx(5);
@@ -1806,11 +1880,13 @@ void DDCPHCPStressUpdate::assignProperties(){
 
   // Parameters for twin systems
   tau_twin = _properties[_qp][101]; // threshold stress for twin
-  drag_twin = _properties[_qp][102]; // drag stress for twin
+  drag_twin0 = _properties[_qp][102]; // drag stress for twin
   gd0twin = _properties[_qp][103]; // reference shear rate for twin
   exp_twin = _properties[_qp][104]; // rate exponent for twin
   gamma_twin = _properties[_qp][105]; // characteristic shear strain for twin
   twin_frac_reorient = _properties[_qp][106]; // twin fraction at which reorientation occurs
+  twin_hard = _properties[_qp][107]; // twin hardening parameter (in lieu of reorientation)
+  twin_hard_exp = _properties[_qp][108]; // twin hardening exponent (in lieu of reorientaion)
 
   B_k = 1.3806503e-23;  // Boltzmann constant
   freq = 1e13;  // Debye frequency
