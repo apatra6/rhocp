@@ -9,9 +9,9 @@
     ymax = 1.0
     zmin = 0.0
     zmax = 1.0
-    nx = 1
-    ny = 1
-    nz = 1
+    nx = 2
+    ny = 2
+    nz = 2
   [../]
   [./bot_corner]
     type = ExtraNodesetGenerator
