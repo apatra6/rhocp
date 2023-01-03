@@ -1,15 +1,16 @@
 [Mesh]
   displacements = 'disp_x disp_y disp_z'
   construct_side_list_from_node_list = false
-  [./emg]
-    type = EBSDMeshGenerator
-    filename = 'tantalum_input_ms.txt'
-  []
-  [./bottom_center]
+  [./fmg]
+    type = FileMeshGenerator
+    file = 64grains_512elems.e
+    # file = 512grains_4096elems.e
+  [../]
+  [./bot_corner]
     type = ExtraNodesetGenerator
-    new_boundary = bottom_center
-    coord = '675.0  0.0  15.0'
-    input = emg
+    new_boundary = bot_corner
+    input = fmg
+    coord = '0 0.0 0.0'
   [../]
   [./add_side_sets]
     type = SideSetsFromNormalsGenerator
@@ -18,17 +19,10 @@
                0  0  1
               -1  0  0
                0 -1  0
-               0  0  -1'
+               0  0 -1'
     fixed_normal = false
     new_boundary = 'xp_face yp_face zp_face xn_face yn_face zn_face'
-    input= bottom_center
-  [../]  
-  [./bottom_nodes]
-    type = BoundingBoxNodeSetGenerator
-    input = add_side_sets
-    new_boundary = bottom_nodes
-    bottom_left = '675.0 0.0  0.0'
-    top_right = '675.0   0.0  15.0'
+    input=bot_corner
   [../]  
 []
 
@@ -51,22 +45,6 @@
 []
 
 [AuxVariables]
-  [./strain_xx]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./strain_xy]
-    order = FIRST
-    family = MONOMIAL
-  [../]
   [./stress_xx]
     order = FIRST
     family = MONOMIAL
@@ -79,7 +57,15 @@
     order = FIRST
     family = MONOMIAL
   [../]
-  [./stress_xy]
+  [./strain_xx]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./strain_yy]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./strain_zz]
     order = FIRST
     family = MONOMIAL
   [../]
@@ -87,7 +73,15 @@
     order = FIRST
     family = MONOMIAL
   [../]
-  [./grain_id]
+  [./Ep_eff]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./rho_m]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./rho_i]
     order = FIRST
     family = MONOMIAL
   [../]
@@ -103,22 +97,6 @@
     order = FIRST
     family = MONOMIAL
   [../]
-  [./rho_m]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./rho_i]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./Ep_eff]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./eeq]
-    order = FIRST
-    family = MONOMIAL
-  [../]
 []
 
 [Kernels]
@@ -130,11 +108,26 @@
 []
 
 [AuxKernels]
-  [./eeq]
-    type = StateVariable
-    variable = eeq
-    sdv_id = 46
-    execute_on = timestep_end
+  [./stress_xx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xx
+    index_i = 0
+    index_j = 0
+  [../]
+  [./stress_yy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yy
+    index_i = 1
+    index_j = 1
+  [../]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
   [../]
   [./strain_zz]
     type = RankTwoAux
@@ -160,59 +153,12 @@
     index_i = 0
     index_j = 0
   [../]
-  [./strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xy
-    execute_on = timestep_end
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    execute_on = timestep_end
-    index_i = 2
-    index_j = 2
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    execute_on = timestep_end
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    execute_on = timestep_end
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    execute_on = timestep_end
-    index_i = 0
-    index_j = 1
-  [../]
   [./vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     execute_on = timestep_end
     scalar_type = VonMisesStress
-  [../]
-  [./grain_id]
-    type = EBSDMeshReaderPointDataAux
-    variable = grain_id
-    ebsd_reader = ebsd_reader
-    data_name = 'feature_id'
-    execute_on = timestep_end
   [../]
   [./phi_1]
     type = OutputEuler
@@ -232,6 +178,12 @@
     angle_id = 2
     execute_on = timestep_end
   [../]
+  [./Ep_eff]
+    type = StateVariable
+    variable = Ep_eff
+    sdv_id = 47
+    execute_on = timestep_end
+  [../]
   [./rho_m]
     type = StateVariable
     variable = rho_m
@@ -244,76 +196,80 @@
     sdv_id = 49
     execute_on = timestep_end
   [../]
-  [./Ep_eff]
-    type = StateVariable
-    variable = Ep_eff
-    sdv_id = 47
-    execute_on = timestep_end
-  [../]
 []
 
 [UserObjects]
-  [./ebsd_reader]
-    # Read in the EBSD data. Uses the filename given in the mesh block.
-    type = EBSDMeshReader
-    execute_on = initial
+  [./euler_angle]
+    type = EulerAngleReader
+    file_name = orientations64.in # orientations512.in
+    execute_on = 'initial'
   [../]
 []
 
 [Functions]
-  [./pull]
+  [./top_pull]
     type = ParsedFunction
-    value = '5280*1.0e-3' # 5280 \mu m is the sample dimension, 1e-3/s is the strain rate
+    value = '0.4*0.0004' # 0.4 is the sample dimension, 4e-4/s is the strain rate
   [../]
 
   [./dts]
     type = PiecewiseLinear
-    x = '0       0.01'
-    y = '0.00001 0.002'
+    x = '0         1.0'
+    y = '0.0001    0.1'
   [../]
 []
 
 [BCs]
-  [./y_roller]
+ [./x_roller]
     type = DirichletBC
+    preset = true
     variable = disp_y
     boundary = yn_face
     value = 0.0
   [../]
-
+  [./y_roller]
+    type = DirichletBC
+    preset = true
+    variable = disp_x
+    boundary = xn_face
+    value = 0.0
+  [../]
   [./z_roller]
     type = DirichletBC
+    preset = true
     variable = disp_z
     boundary = zn_face
     value = 0.0
   [../]
 
-  [./x_fix]
+  [./z_bot]
     type = DirichletBC
+    preset = true
     variable = disp_x
-    boundary = bottom_nodes
+    boundary = bot_corner
     value = 0.0
   [../]
 
-  # [./y_fix]
-  #   type = DirichletBC
-  #   variable = disp_y
-  #   boundary = bottom_nodes
-  #   value = 0.0
-  # [../]
-
-  # [./z_fix]
-  #   type = DirichletBC
-  #   variable = disp_z
-  #   boundary = bottom_center
-  #   value = 0.0
-  # [../]
-
-  [./y_pull_function]
-    type = PresetVelocity
+  [./y_bot]
+    type = DirichletBC
+    preset = true
     variable = disp_y
-    boundary = yp_face
-    function = pull
+    boundary = bot_corner
+    value = 0.0
+  [../]
+
+  [./x_bot]
+    type = DirichletBC
+    preset = true
+    variable = disp_z
+    boundary = bot_corner
+    value = 0.0
+  [../]
+  [./z_pull_function]
+    type = PresetVelocity
+    variable = disp_z
+    boundary = zp_face
+    function = top_pull
   [../]
 []
 
@@ -325,61 +281,50 @@
   [../]
   [./CPStressUpdate]
     type = DDCPStressUpdate
-    propsFile = bcc_props.in
-    slipSysFile = bcc_slip_sys.in
-    num_slip_sys = 24
-    num_state_vars = 122 # 50 + 3*num_slip_sys
+    propsFile = fcc_props.in
+    slipSysFile = fcc_slip_sys.in
+    num_slip_sys = 12
+    num_state_vars = 86 # 50 + 3*num_slip_sys
     num_props = 30
     temp = 298 # K
-    tol = 5e-6
-    EBSDFileReader = ebsd_reader
-    isEulerBunge = 1
+    tol = 5e-7
+    EulerAngFileReader = euler_angle
   [../]
   [./elasticity_tensor]
     type = ComputeCPElasticityTensor
   [../]
 []
 
-
 [Preconditioning]
   [./SMP]
     type = SMP
-    full = true
+    full=true
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  # uncomment for implicit solve
-  # solve_type = 'NEWTON'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  # petsc_options_value = 'lu superlu_dist'
-
-  # uncomment for explicit solve
-  scheme = 'explicit-euler'
-  solve_type = 'LINEAR'
-  line_search = 'none'
+  solve_type = 'NEWTON'
 
   petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
 
-  l_tol = 1e-10
-  nl_abs_tol = 5e-6
+  l_tol = 1e-8
+  nl_abs_tol = 5e-7
   nl_rel_tol = 1e-6
-  nl_max_its = 10
+  nl_max_its = 20
   nl_forced_its = 1
-  l_max_its = 10000
-
+  l_max_its = 10
   start_time = 0.0
-  end_time = 100.0
-  dt = 0.001
-  dtmax = 0.001
+  end_time = 250.0
 
   [./TimeStepper]
     type = FunctionDT
     function = dts
     min_dt = 1e-8
-    cutback_factor_at_failure = 0.5
+    cutback_factor_at_failure = 0.1
     growth_factor = 2
   [../]
 
@@ -387,9 +332,22 @@
     type = SimplePredictor
     scale = 1
   [../]
+
 []
 
 [Postprocessors]
+  [./stress_xx]
+    type = ElementAverageValue
+    variable = stress_xx
+  [../]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+  [../]
   [./strain_zz]
     type = ElementAverageValue
     variable = strain_zz
@@ -402,30 +360,11 @@
     type = ElementAverageValue
     variable = strain_xx
   [../]
-  [./strain_xy]
-    type = ElementAverageValue
-    variable = strain_xy
-  [../]
-  [./stress_zz]
-    type = ElementAverageValue
-    variable = stress_zz
-  [../]
-  [./stress_yy]
-    type = ElementAverageValue
-    variable = stress_yy
-  [../]
-  [./stress_xx]
-    type = ElementAverageValue
-    variable = stress_xx
-  [../]
-  [./stress_xy]
-    type = ElementAverageValue
-    variable = stress_xy
-  [../]
   [./vonmises]
     type = ElementAverageValue
     variable = vonmises
   [../]
+
   [./phi_1]
     type = ElementAverageValue
     variable = phi_1
@@ -438,6 +377,10 @@
     type = ElementAverageValue
     variable = phi_2
   [../]
+  [./Ep_eff]
+    type = ElementAverageValue
+    variable = Ep_eff
+  [../]
   [./rho_m]
     type = ElementAverageValue
     variable = rho_m
@@ -446,29 +389,21 @@
     type = ElementAverageValue
     variable = rho_i
   [../]
-  [./Ep_eff]
-    type = ElementAverageValue
-    variable = Ep_eff
-  [../]
-  [./eeq]
-    type = ElementAverageValue
-    variable = eeq
-  [../]
 []
 
 [Outputs]
-  file_base = out_EBSD_2
+  file_base = Cu_tension_4em4ps
   csv = true
   print_linear_residuals = true
   perf_graph = true
   interval = 10
-  [out]
-    type = Checkpoint
-    num_files = 5
-    interval = 200
-  []
   [./exodus]
    type = Exodus
-   interval = 200
+   interval = 50
+  [../]
+  [./cp]
+    type = Checkpoint
+    interval = 100
+    num_files = 2
   [../]
 []
