@@ -207,15 +207,15 @@
 []
 
 [Functions]
-  [./top_pull]
+  [./top_push]
     type = ParsedFunction
-    value = '0.4*0.0004' # 0.4 is the sample dimension, 4e-4/s is the strain rate
+    value = '-0.4*0.1' # 0.4 is the sample dimension, 1e-1/s is the strain rate
   [../]
 
   [./dts]
     type = PiecewiseLinear
-    x = '0         1.0'
-    y = '0.0001    0.1'
+    x = '0         0.001'
+    y = '0.0001    0.0001'
   [../]
 []
 
@@ -265,11 +265,11 @@
     boundary = bot_corner
     value = 0.0
   [../]
-  [./z_pull_function]
+  [./z_push_function]
     type = PresetVelocity
     variable = disp_z
     boundary = zp_face
-    function = top_pull
+    function = top_push
   [../]
 []
 
@@ -287,7 +287,7 @@
     num_state_vars = 86 # 50 + 3*num_slip_sys
     num_props = 30
     temp = 298 # K
-    tol = 5e-7
+    tol = 5e-4
     EulerAngFileReader = euler_angle
   [../]
   [./elasticity_tensor]
@@ -318,7 +318,7 @@
   nl_forced_its = 1
   l_max_its = 10
   start_time = 0.0
-  end_time = 250.0
+  end_time = 1.0
 
   [./TimeStepper]
     type = FunctionDT
@@ -392,7 +392,7 @@
 []
 
 [Outputs]
-  file_base = Cu_tension_4em4ps
+  file_base = Cu_compression_1em1ps
   csv = true
   print_linear_residuals = true
   perf_graph = true
