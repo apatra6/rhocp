@@ -3,7 +3,7 @@
   construct_side_list_from_node_list = false
   [./emg]
     type = EBSDMeshGenerator
-    filename = 'tantalum_input_ms.txt'
+    filename = 'tantalum_input_ms_v2.txt'
   []
   [./bottom_center]
     type = ExtraNodesetGenerator
@@ -36,17 +36,17 @@
   [./disp_x]
     order = FIRST
     family = LAGRANGE
-    scaling = 1e-4
+    scaling = 1e-6
   [../]
   [./disp_y]
     order = FIRST
     family = LAGRANGE
-    scaling = 1e-4
+    scaling = 1e-6
   [../]
   [./disp_z]
     order = FIRST
     family = LAGRANGE
-    scaling = 1e-4
+    scaling = 1e-6
   [../]
 []
 
@@ -295,20 +295,6 @@
     value = 0.0
   [../]
 
-  # [./y_fix]
-  #   type = DirichletBC
-  #   variable = disp_y
-  #   boundary = bottom_nodes
-  #   value = 0.0
-  # [../]
-
-  # [./z_fix]
-  #   type = DirichletBC
-  #   variable = disp_z
-  #   boundary = bottom_center
-  #   value = 0.0
-  # [../]
-
   [./y_pull_function]
     type = PresetVelocity
     variable = disp_y
@@ -331,7 +317,7 @@
     num_state_vars = 122 # 50 + 3*num_slip_sys
     num_props = 30
     temp = 298 # K
-    tol = 5e-6
+    tol = 1e-6
     EBSDFileReader = ebsd_reader
     isEulerBunge = 1
   [../]
@@ -351,12 +337,12 @@
 [Executioner]
   type = Transient
 
-  # uncomment for implicit solve
+  ## uncomment for implicit solve
   # solve_type = 'NEWTON'
   # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   # petsc_options_value = 'lu superlu_dist'
 
-  # uncomment for explicit solve
+  ## uncomment for explicit solve
   scheme = 'explicit-euler'
   solve_type = 'LINEAR'
   line_search = 'none'
@@ -364,7 +350,7 @@
   petsc_options = '-snes_ksp_ew'
 
   l_tol = 1e-10
-  nl_abs_tol = 5e-6
+  nl_abs_tol = 1e-6
   nl_rel_tol = 1e-6
   nl_max_its = 10
   nl_forced_its = 1
@@ -372,8 +358,8 @@
 
   start_time = 0.0
   end_time = 100.0
-  dt = 0.001
-  dtmax = 0.001
+  dt = 0.002
+  dtmax = 0.002
 
   [./TimeStepper]
     type = FunctionDT
