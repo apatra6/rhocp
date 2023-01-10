@@ -19,3 +19,4 @@ The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_st
 - The EBSD mesh file can be created using DREAM3D. See: https://mooseframework.inl.gov/source/userobjects/EBSDReader.html and http://www.dream3d.io/2_Tutorials/EBSDReconstruction/ for additional details.
 - Simulations can be run using the following example command: `mpiexec -n 4 ../../../rhocp-opt -i Cu_compression_sim.i` for running the example given in  `rhocp/examples/copper/compression_sr_1e-1ps/`.
 - Output files in the form of `.csv` files can be used for plotting averaged values of various quantities and `.e` files can be visualized using Paraview (https://www.paraview.org/) for the deformation contours.
+- Spatio-temporal data can also be extracted from the `.e` output files using the Python SEACAS (https://github.com/sandialabs/seacas) libraries (an example script is provided) or directly using the data extraction tools in Paraview.
