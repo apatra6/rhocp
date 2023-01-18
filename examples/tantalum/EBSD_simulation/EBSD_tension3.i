@@ -3,7 +3,7 @@
   construct_side_list_from_node_list = false
   [./emg]
     type = EBSDMeshGenerator
-    filename = 'tantalum_input_ms_v2.txt'
+    filename = 'tantalum_input_original_euler.txt'
   []
   [./bottom_center]
     type = ExtraNodesetGenerator
@@ -280,18 +280,17 @@
     boundary = yn_face
     value = 0.0
   [../]
+  [./x_roller]
+    type = DirichletBC
+    variable = disp_x
+    boundary = yn_face
+    value = 0.0
+  [../]
 
   [./z_roller]
     type = DirichletBC
     variable = disp_z
     boundary = zn_face
-    value = 0.0
-  [../]
-
-  [./x_fix]
-    type = DirichletBC
-    variable = disp_x
-    boundary = bottom_nodes
     value = 0.0
   [../]
 
@@ -443,7 +442,7 @@
 []
 
 [Outputs]
-  file_base = out_EBSD_2
+  file_base = out_EBSD_3
   csv = true
   print_linear_residuals = true
   perf_graph = true
