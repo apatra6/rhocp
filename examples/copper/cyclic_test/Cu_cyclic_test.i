@@ -97,6 +97,54 @@
     order = FIRST
     family = MONOMIAL
   [../]
+  [./backstress01]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress02]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress03]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress04]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress05]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress06]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress07]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress08]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress09]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress10]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress11]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./backstress12]
+    order = FIRST
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -194,6 +242,79 @@
     type = StateVariable
     variable = rho_i
     sdv_id = 49
+    execute_on = timestep_end
+  [../]
+
+  [./backstress01]
+    type = StateVariable
+    variable = backstress01
+    sdv_id = 75
+    execute_on = timestep_end
+  [../]
+  [./backstress02]
+    type = StateVariable
+    variable = backstress02
+    sdv_id = 76
+    execute_on = timestep_end
+  [../]
+  [./backstress03]
+    type = StateVariable
+    variable = backstress03
+    sdv_id = 77
+    execute_on = timestep_end
+  [../]
+  [./backstress04]
+    type = StateVariable
+    variable = backstress04
+    sdv_id = 78
+    execute_on = timestep_end
+  [../]
+  [./backstress05]
+    type = StateVariable
+    variable = backstress05
+    sdv_id = 79
+    execute_on = timestep_end
+  [../]
+  [./backstress06]
+    type = StateVariable
+    variable = backstress06
+    sdv_id = 80
+    execute_on = timestep_end
+  [../]
+  [./backstress07]
+    type = StateVariable
+    variable = backstress07
+    sdv_id = 81
+    execute_on = timestep_end
+  [../]
+  [./backstress08]
+    type = StateVariable
+    variable = backstress08
+    sdv_id = 82
+    execute_on = timestep_end
+  [../]
+  [./backstress09]
+    type = StateVariable
+    variable = backstress09
+    sdv_id = 83
+    execute_on = timestep_end
+  [../]
+  [./backstress10]
+    type = StateVariable
+    variable = backstress10
+    sdv_id = 84
+    execute_on = timestep_end
+  [../]
+  [./backstress11]
+    type = StateVariable
+    variable = backstress11
+    sdv_id = 85
+    execute_on = timestep_end
+  [../]
+  [./backstress12]
+    type = StateVariable
+    variable = backstress12
+    sdv_id = 86
     execute_on = timestep_end
   [../]
 []
@@ -398,6 +519,54 @@
     type = ElementAverageValue
     variable = rho_i
   [../]
+  [./backstress01]
+    type = ElementAverageValue
+    variable = backstress01
+  [../]
+  [./backstress02]
+    type = ElementAverageValue
+    variable = backstress02
+  [../]
+  [./backstress03]
+    type = ElementAverageValue
+    variable = backstress03
+  [../]
+  [./backstress04]
+    type = ElementAverageValue
+    variable = backstress04
+  [../]
+  [./backstress05]
+    type = ElementAverageValue
+    variable = backstress05
+  [../]
+  [./backstress06]
+    type = ElementAverageValue
+    variable = backstress06
+  [../]
+  [./backstress07]
+    type = ElementAverageValue
+    variable = backstress07
+  [../]
+  [./backstress08]
+    type = ElementAverageValue
+    variable = backstress08
+  [../]
+  [./backstress09]
+    type = ElementAverageValue
+    variable = backstress09
+  [../]
+  [./backstress10]
+    type = ElementAverageValue
+    variable = backstress10
+  [../]
+  [./backstress11]
+    type = ElementAverageValue
+    variable = backstress11
+  [../]
+  [./backstress12]
+    type = ElementAverageValue
+    variable = backstress12
+  [../]
 []
 
 [Outputs]
@@ -408,7 +577,7 @@
   interval = 10
   [./exodus]
    type = Exodus
-   interval = 50
+   interval = 100
   [../]
   [./cp]
     type = Checkpoint

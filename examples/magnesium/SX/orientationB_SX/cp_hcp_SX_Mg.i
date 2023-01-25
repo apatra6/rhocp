@@ -375,8 +375,8 @@
   [../]
   [./dts]
     type = PiecewiseLinear
-    x = '0 0.01'
-    y = '0.00005 0.01'
+    x = '0 0.001'
+    y = '0.00005 0.1'
   [../]
 []
 
@@ -411,29 +411,6 @@
     value = 0.0
   [../]
 
-  # fixed BCs
-  # corner node fixed in all DOFs
-  [./z_bot]
-    type = DirichletBC
-    variable = disp_z
-    boundary = bot_corner
-    value = 0.0
-  [../]
-
-  [./y_bot]
-    type = DirichletBC
-    variable = disp_y
-    boundary = bot_corner
-    value = 0.0
-  [../]
-
-  [./x_bot]
-    type = DirichletBC
-    variable = disp_x
-    boundary = bot_corner
-    value = 0.0
-  [../]
-
   [./y_push_function]
     type = PresetVelocity
     variable = disp_y
@@ -464,7 +441,7 @@
     num_state_vars = 117
     num_props = 109
     temp = 300 # K
-    tol = 1e-8
+    tol = 5e-7
     EulerAngFileReader = euler_angle
   [../]
 []
@@ -492,7 +469,7 @@
   petsc_options_value = 'lu superlu_dist'
 
   l_tol = 1e-10
-  nl_abs_tol = 1e-7
+  nl_abs_tol = 1e-6
   nl_rel_tol = 1e-5
   nl_forced_its = 1
   nl_max_its = 10
@@ -631,11 +608,11 @@
 []
 
 [Outputs]
-  file_base = out_ori4
+  file_base = out_oriB
   csv = true
   print_linear_residuals = true
   perf_graph = true
-  interval = 100
+  interval = 10
   # [out]
   #     type = Checkpoint
   #     num_files = 2
@@ -643,6 +620,6 @@
   # []
   [./exodus]
     type = Exodus
-    interval = 1000
+    interval = 100
   [../]
 []

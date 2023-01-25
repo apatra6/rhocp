@@ -376,7 +376,7 @@
   [./dts]
     type = PiecewiseLinear
     x = '0 0.001'
-    y = '0.00005 0.1'
+    y = '0.00005 0.02'
   [../]
 []
 
@@ -408,29 +408,6 @@
     type = DirichletBC
     variable = disp_x
     boundary = left
-    value = 0.0
-  [../]
-
-  # fixed BCs
-  # corner node fixed in all DOFs
-  [./z_bot]
-    type = DirichletBC
-    variable = disp_z
-    boundary = bot_corner
-    value = 0.0
-  [../]
-
-  [./y_bot]
-    type = DirichletBC
-    variable = disp_y
-    boundary = bot_corner
-    value = 0.0
-  [../]
-
-  [./x_bot]
-    type = DirichletBC
-    variable = disp_x
-    boundary = bot_corner
     value = 0.0
   [../]
 
@@ -631,7 +608,7 @@
 []
 
 [Outputs]
-  file_base = out_ori2
+  file_base = out_oriE
   csv = true
   print_linear_residuals = true
   perf_graph = true
