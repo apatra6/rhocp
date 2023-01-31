@@ -388,24 +388,24 @@
 
   # fixed BCs
   # corner node fixed in all DOFs
-  [./z_bot]
-    type = DirichletBC
-    variable = disp_z
-    boundary = bot_corner
-    value = 0.0
-  [../]
-  [./y_bot]
-    type = DirichletBC
-    variable = disp_y
-    boundary = bot_corner
-    value = 0.0
-  [../]
-  [./x_bot]
-    type = DirichletBC
-    variable = disp_x
-    boundary = bot_corner
-    value = 0.0
-  [../]
+  # [./z_bot]
+  #   type = DirichletBC
+  #   variable = disp_z
+  #   boundary = bot_corner
+  #   value = 0.0
+  # [../]
+  # [./y_bot]
+  #   type = DirichletBC
+  #   variable = disp_y
+  #   boundary = bot_corner
+  #   value = 0.0
+  # [../]
+  # [./x_bot]
+  #   type = DirichletBC
+  #   variable = disp_x
+  #   boundary = bot_corner
+  #   value = 0.0
+  # [../]
 
   [./z_push_function]
     type = PresetVelocity

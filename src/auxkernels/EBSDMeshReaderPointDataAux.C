@@ -1,3 +1,6 @@
+// This is a local copy of moose/modules/phase_field/src/aux_kernels/EBSDReaderPointDataAux.C
+// This local class is used by EBSDMeshReader.C in rho-CP
+
 #include "EBSDMeshReaderPointDataAux.h"
 
 registerMooseObject("RhocpApp", EBSDMeshReaderPointDataAux);

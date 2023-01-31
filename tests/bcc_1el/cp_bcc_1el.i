@@ -88,6 +88,7 @@
 
 [Kernels]
   [./TensorMechanics]
+    strain = FINITE
     displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
@@ -198,7 +199,7 @@
 [Functions]
   [./top_pull]
     type = ParsedFunction
-    value = '0.0001' # *t'
+    value = '0.0001'
   [../]
 
   [./dts]
@@ -262,7 +263,6 @@
   [../]
   [./elasticity_tensor]
     type = ComputeCPElasticityTensor
-    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 
@@ -276,27 +276,20 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'NEWTON'
-  # solve_type = 'PJFNK'
-  # solve_type = 'FD'
-
 
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-  # petsc_options_iname = '-pc_type -pc_hypre_type'
-  # petsc_options_value = 'hypre boomeramg'
-  line_search = 'none'
 
   l_tol = 1e-8
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-6
   nl_max_its = 20
-  # nl_forced_its = 1
+  nl_forced_its = 1
   l_max_its = 10
   start_time = 0.0
-  end_time = 5000.0
+  end_time = 20.0
 
   [./TimeStepper]
     type = FunctionDT
@@ -368,20 +361,13 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = out_bcc
   csv = true
   print_linear_residuals = true
   print_perf_log = true
   interval = 1
   [./exodus]
-   type = Exodus
-   # elemental_as_nodal = true
-   # use_displaced = true
-   interval = 1
-  [../]
-  [./cp]
-    type = Checkpoint
-    interval = 100
-    num_files = 2
+    type = Exodus
+    interval = 10
   [../]
 []
