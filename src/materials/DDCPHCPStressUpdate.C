@@ -226,7 +226,7 @@ void DDCPHCPStressUpdate::computeQpStress()
     std::ifstream file_slip_sys;
     file_slip_sys.open(_slipSysFile.c_str());
 
-    // Assign slip system normals and slip directions for a BCC material
+    // Assign slip system normals and slip directions
     for (unsigned int i = 0; i < _num_slip_sys; i++) {
       for(unsigned int j = 0; j < 4; j++){
         //y[j][i] = reader.getData(c++)[0];
@@ -240,6 +240,7 @@ void DDCPHCPStressUpdate::computeQpStress()
     file_slip_sys.close();
 
     // Convert from hkil to hkl system
+    // Adopted from https://www.cavs.msstate.edu/icme/Mesoscale/
     for (unsigned int i = 0; i < _num_slip_sys; i++) {
       _y[_qp][0][i] = y_hkil[0][i];
       _y[_qp][1][i] = (y_hkil[0][i] + 2.0*y_hkil[1][i])/sqrt(3.0);

@@ -211,7 +211,7 @@ void DDCPStressUpdate::computeQpStress()
     std::ifstream file_slip_sys;
     file_slip_sys.open(_slipSysFile.c_str());
 
-    // Assign slip system normals and slip directions for a BCC material
+    // Assign slip system normals and slip directions
     for (unsigned int i = 0; i < _num_slip_sys; i++) {
       for(unsigned int j = 0; j < 3; j++){
         //y[j][i] = reader.getData(c++)[0];
