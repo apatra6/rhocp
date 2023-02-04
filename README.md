@@ -9,7 +9,7 @@
 &rho;-CP is a crystal plasticity solver that interfaces with the open source finite element solver, MOOSE (https://github.com/idaholab/moose), for crystal plasticity finite element modeling of anisotropic, heterogeneous deformation in polycrystalline ensembles. Source codes for the dislocation density-based crystal plasticity solver are provided in this repository, along with example applications for the thermo-mechanical deformation of hcp magnesium single and polycrystals, polycrystalline fcc OFHC copper and polycrystalline bcc tantalum.
 
 ## Installation
-The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_started/installation/index.html), then clone and compile &rho;-CP alongside MOOSE in the projects directory:
+The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_started/installation/index.html), then clone and compile &rho;-CP alongside MOOSE in the `projects` directory:
 - The source files can be obtained either using the following command: `git clone https://github.com/apatra6/rhocp.git` or directly downloading the repository from github.
 - The executable can be compiled using: `make -j 4` to get the executable `rhocp-opt` (here 4 represents the number of processors used for compiling and can be modified appropriately).
 - If the user wishes to perform code developement and debug the application using `gdb`, the executable should be compiled in `debug` mode using the following coomand: `METHOD=dbg make -j 4` to get the executable `rhocp-dbg` (more details can be found at: https://mooseframework.inl.gov/application_development/debugging.html).
