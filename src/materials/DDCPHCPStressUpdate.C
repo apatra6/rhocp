@@ -721,7 +721,7 @@ void DDCPHCPStressUpdate::computeQpStress()
     for (unsigned int ib = 0; ib < (_num_slip_sys - _num_twin_sys); ib++) {
       sum1 = sum1 + p0[isx(ib)]*A[ia][ib]*(rho_m[ib] + rho_i[ib]);
     }
-    s_a[ia] = tau0[isx(ia)] + hp_coeff[isx(ia)]/sqrt(grain_size[isx(ia)]) + q_t[isx(ia)]*G*b_mag[isx(ia)]*sqrt(sum1);
+    s_a[ia] = tau0[isx(ia)] + hp_coeff[isx(ia)]/sqrt(grain_size[isx(ia)]) + k_rho[isx(ia)]*G*b_mag[isx(ia)]*sqrt(sum1);
   }
 
   // Calculate reference shear stress for each slip system.
@@ -926,9 +926,9 @@ void DDCPHCPStressUpdate::computeQpStress()
       }
       dldrhom[ia][ia] = - 0.5*pow(d_disl[ia],2.0)*H[ia][ia]/sqrt(sum1);
 
-      temp2[ia][ia] = temp2[ia][ia] + (k_mul[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - x_d[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - (k_ann[isx(ia)]*R_c[isx(ia)]*rho_m[ia]/b_mag[isx(ia)]))*(sgn(gamma_dot[ia])*dt_incr);
+      temp2[ia][ia] = temp2[ia][ia] + (k_M[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - k_I[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - (k_ann[isx(ia)]*R_c[isx(ia)]*rho_m[ia]/b_mag[isx(ia)]))*(sgn(gamma_dot[ia])*dt_incr);
 
-      temp1[ia][ia] = temp1[ia][ia] + 1.0 + (k_mul[isx(ia)]/b_mag[isx(ia)]/pow(d_disl[ia], 2))*dldrhom[ia][ia]*abs(gamma_dot[ia])*dt_incr + k_ann[isx(ia)]*R_c[isx(ia)]*abs(gamma_dot[ia])*dt_incr/b_mag[isx(ia)] + 0.5*x_d[isx(ia)]*H[ia][ia]*abs(gamma_dot[ia])*dt_incr/sqrt(sum1)/b_mag[isx(ia)];
+      temp1[ia][ia] = temp1[ia][ia] + 1.0 + (k_M[isx(ia)]/b_mag[isx(ia)]/pow(d_disl[ia], 2))*dldrhom[ia][ia]*abs(gamma_dot[ia])*dt_incr + k_ann[isx(ia)]*R_c[isx(ia)]*abs(gamma_dot[ia])*dt_incr/b_mag[isx(ia)] + 0.5*k_I[isx(ia)]*H[ia][ia]*abs(gamma_dot[ia])*dt_incr/sqrt(sum1)/b_mag[isx(ia)];
     }
 
     std::vector<std::vector<Real>> temp1_inv((_num_slip_sys - _num_twin_sys), std::vector<Real>((_num_slip_sys - _num_twin_sys)));
@@ -953,8 +953,8 @@ void DDCPHCPStressUpdate::computeQpStress()
         drhoidgb[ia][ib] = 0.0;
         sum1 = sum1 + H[ia][ib]*(rho_m[ib] + rho_i[ib]);
       }
-      Real t3 = x_d[isx(ia)]*sqrt(sum1)/b_mag[isx(ia)] - k_dyn[isx(ia)]*rho_i[ia];
-      Real t4 = 1.0e0 - dt_incr*abs(gamma_dot[ia])*0.5*x_d[isx(ia)]*H[ia][ia]/b_mag[isx(ia)]/sqrt(sum1) + k_dyn[isx(ia)]*dt_incr*abs(gamma_dot[ia]);
+      Real t3 = k_I[isx(ia)]*sqrt(sum1)/b_mag[isx(ia)] - k_D[isx(ia)]*rho_i[ia];
+      Real t4 = 1.0e0 - dt_incr*abs(gamma_dot[ia])*0.5*k_I[isx(ia)]*H[ia][ia]/b_mag[isx(ia)]/sqrt(sum1) + k_D[isx(ia)]*dt_incr*abs(gamma_dot[ia]);
 
       drhoidgb[ia][ia] = t3*sgn(gamma_dot[ia])*dt_incr/t4;
     }
@@ -962,10 +962,10 @@ void DDCPHCPStressUpdate::computeQpStress()
     // backstress
     for(unsigned int ia = 0; ia < (_num_slip_sys - _num_twin_sys); ia++) {
       for(unsigned int ib = 0; ib < (_num_slip_sys - _num_twin_sys); ib++) {
-        dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1[isx(ia)]*(0.5*(q_t[isx(ia)]*G*b_mag[isx(ia)])/sqrt(rho_m[ia] + rho_i[ia]))*dt_incr*(drhomdgb[ia][ib] + drhoidgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
+        dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1[isx(ia)]*(0.5*(k_rho[isx(ia)]*G*b_mag[isx(ia)])/sqrt(rho_m[ia] + rho_i[ia]))*dt_incr*(drhomdgb[ia][ib] + drhoidgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
       }
 
-      dbsdgb[ia][ia] = dbsdgb[ia][ia] + k_bs1[isx(ia)]*q_t[isx(ia)]*G*b_mag[isx(ia)]*dt_incr*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress[ia])*sgn(gamma_dot[ia]) - k_bs2[isx(ia)]*dt_incr*  bstress[ia]*sgn(gamma_dot[ia]);
+      dbsdgb[ia][ia] = dbsdgb[ia][ia] + k_bs1[isx(ia)]*k_rho[isx(ia)]*G*b_mag[isx(ia)]*dt_incr*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress[ia])*sgn(gamma_dot[ia]) - k_bs2[isx(ia)]*dt_incr*  bstress[ia]*sgn(gamma_dot[ia]);
     }
 
     for(unsigned int ia = 0; ia < (_num_slip_sys - _num_twin_sys); ia++) {
@@ -987,7 +987,7 @@ void DDCPHCPStressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < (_num_slip_sys - _num_twin_sys); ib++) {
         sum1 = sum1 + p0[isx(ia)]*A[ia][ib]*(rho_m[ib] + rho_i[ib]);
 
-        dsadgb[ia][ib] = 0.5*q_t[isx(ia)]*G*b_mag[isx(ia)]*(p0[isx(ia)]*A[ia][ib]*(drhomdgb[ia][ib] + drhoidgb[ia][ib])/sqrt(sum1));
+        dsadgb[ia][ib] = 0.5*k_rho[isx(ia)]*G*b_mag[isx(ia)]*(p0[isx(ia)]*A[ia][ib]*(drhomdgb[ia][ib] + drhoidgb[ia][ib])/sqrt(sum1));
       }
     }
 
@@ -1672,9 +1672,9 @@ void DDCPHCPStressUpdate::NR_residual (unsigned int num_slip_sys, unsigned int n
     for(unsigned int ib = 0; ib < (num_slip_sys - num_twin_sys); ib++) {
       sum1 = sum1 + H[ia][ib]*(rho_m0[ib] + rho_i0[ib]);
     }
-    drhomdt[ia] = (k_mul[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - k_ann[isx(ia)]*R_c[isx(ia)]*rho_m0[ia]/b_mag[isx(ia)] - (x_d[isx(ia)]*sqrt(sum1))/b_mag[isx(ia)])*abs(gdt[ia]);
+    drhomdt[ia] = (k_M[isx(ia)]/b_mag[isx(ia)]/d_disl[ia] - k_ann[isx(ia)]*R_c[isx(ia)]*rho_m0[ia]/b_mag[isx(ia)] - (k_I[isx(ia)]*sqrt(sum1))/b_mag[isx(ia)])*abs(gdt[ia]);
 
-    drhoidt[ia] = ((x_d[isx(ia)]*sqrt(sum1))/b_mag[isx(ia)] - k_dyn[isx(ia)]*rho_i0[ia])*abs(gdt[ia]);
+    drhoidt[ia] = ((k_I[isx(ia)]*sqrt(sum1))/b_mag[isx(ia)] - k_D[isx(ia)]*rho_i0[ia])*abs(gdt[ia]);
   }
 
   for(unsigned int ia = 0; ia < (num_slip_sys - num_twin_sys); ia++) {
@@ -1690,7 +1690,7 @@ void DDCPHCPStressUpdate::NR_residual (unsigned int num_slip_sys, unsigned int n
 
   // Calculate the back stress for each slip system.
   for(unsigned int ia = 0; ia < (num_slip_sys - num_twin_sys); ia++) {
-    dbstressdt[ia] = (k_bs1[isx(ia)]*q_t[isx(ia)]*G*b_mag[isx(ia)]*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress0[ia]) - k_bs2[isx(ia)]*bstress0[ia])*abs(gdt[ia]);
+    dbstressdt[ia] = (k_bs1[isx(ia)]*k_rho[isx(ia)]*G*b_mag[isx(ia)]*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress0[ia]) - k_bs2[isx(ia)]*bstress0[ia])*abs(gdt[ia]);
 
     bstress[ia] = bstress0[ia] + dbstressdt[ia]*dt;
   }
@@ -1701,7 +1701,7 @@ void DDCPHCPStressUpdate::NR_residual (unsigned int num_slip_sys, unsigned int n
     for(unsigned int ib = 0; ib < (num_slip_sys - num_twin_sys); ib++) {
       sum1 = sum1 + p0[isx(ia)]*A[ia][ib]*(rho_m[ib] + rho_i[ib]);
     }
-    s_a[ia] = tau0[isx(ia)] + hp_coeff[isx(ia)]/sqrt(grain_size[isx(ia)]) + q_t[isx(ia)]*G*b_mag[isx(ia)]*sqrt(sum1);
+    s_a[ia] = tau0[isx(ia)] + hp_coeff[isx(ia)]/sqrt(grain_size[isx(ia)]) + k_rho[isx(ia)]*G*b_mag[isx(ia)]*sqrt(sum1);
   }
 
   // Calculate thermal slip resistance for each slip system.
@@ -1861,8 +1861,8 @@ void DDCPHCPStressUpdate::assignProperties(){
 
   frictional_stress[i] = _properties[_qp][12 + 22*i + 9]; // Lattice frictional resistance
   p0[i] = _properties[_qp][12 + 22*i + 10];  // Dislcoation barrier strength
-  q_t[i] = _properties[_qp][12 + 22*i + 11];  // Taylor hardening parameter
-  x_d[i] = _properties[_qp][12 + 22*i + 12];  // Mean free path constant (dislocation network)
+  k_rho[i] = _properties[_qp][12 + 22*i + 11];  // Taylor hardening parameter
+  k_I[i] = _properties[_qp][12 + 22*i + 12];  // Mean free path constant (dislocation network)
 
   Alatent[i] = _properties[_qp][12 + 22*i + 13];  // Latent hardening coefficient
 
@@ -1870,10 +1870,10 @@ void DDCPHCPStressUpdate::assignProperties(){
   rho_m_zero[i] = _properties[_qp][12 + 22*i + 14];  // Initial mobile dislocation density
   rho_i_zero[i] = _properties[_qp][12 + 22*i + 15];  // Initial immobile dislocation density
   d_disl_zero[i] = _properties[_qp][12 + 22*i + 16];  // Initial dislocation line length
-  k_mul[i] = _properties[_qp][12 + 22*i + 17]; // Dislocation line generation constant
+  k_M[i] = _properties[_qp][12 + 22*i + 17]; // Dislocation line generation constant
   R_c[i] = _properties[_qp][12 + 22*i + 18];  // Critical capture radius for dislocation annihilation
   k_ann[i] = _properties[_qp][12 + 22*i + 19];  // Dislocation evolution annihilation constant
-  k_dyn[i] = _properties[_qp][12 + 22*i + 20];  // Immobile dislocation evolution dynamic recovery constant
+  k_D[i] = _properties[_qp][12 + 22*i + 20];  // Immobile dislocation evolution dynamic recovery constant
   k_bs1[i] = _properties[_qp][12 + 22*i + 21];  // Backstress evolution constant 1
   k_bs2[i] = _properties[_qp][12 + 22*i + 22];  // Backstress evolution constant 2
   }

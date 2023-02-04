@@ -565,7 +565,7 @@ void DDCPStressUpdate::computeQpStress()
     for (unsigned int ib = 0; ib < _num_slip_sys; ib++) {
       sum1 = sum1 + p0*A[ia][ib]*(rho_m[ib] + rho_i[ib]);
     }
-    s_a[ia] = tau0 + hp_coeff/sqrt(grain_size) + q_t*G*b_mag*sqrt(sum1);
+    s_a[ia] = tau0 + hp_coeff/sqrt(grain_size) + k_rho*G*b_mag*sqrt(sum1);
   }
 
   // Calculate reference shear stress for each slip system.
@@ -665,12 +665,12 @@ void DDCPStressUpdate::computeQpStress()
       }
       dldrhom[ia][ia] = - 0.5*pow(d_disl[ia],2.0)*H[ia][ia]/sqrt(sum1);
 
-      temp2[ia][ia] = temp2[ia][ia] + (k_mul/b_mag/d_disl[ia] - x_d/b_mag/d_disl[ia]
+      temp2[ia][ia] = temp2[ia][ia] + (k_M/b_mag/d_disl[ia] - k_I/b_mag/d_disl[ia]
                         - (k_ann*R_c*rho_m[ia]/b_mag))*(sgn(gamma_dot[ia])*dt_incr);
 
-      temp1[ia][ia] = temp1[ia][ia] + 1.0 + (k_mul/b_mag/pow(d_disl[ia], 2))*dldrhom[ia][ia]*abs(gamma_dot[ia])
+      temp1[ia][ia] = temp1[ia][ia] + 1.0 + (k_M/b_mag/pow(d_disl[ia], 2))*dldrhom[ia][ia]*abs(gamma_dot[ia])
                         *dt_incr + k_ann*R_c*abs(gamma_dot[ia])*dt_incr/b_mag
-                        + 0.5*x_d*H[ia][ia]*abs(gamma_dot[ia])*dt_incr/sqrt(sum1)/b_mag;
+                        + 0.5*k_I*H[ia][ia]*abs(gamma_dot[ia])*dt_incr/sqrt(sum1)/b_mag;
     }
 
     std::vector<std::vector<Real>> temp1_inv(_num_slip_sys, std::vector<Real>(_num_slip_sys));
@@ -694,8 +694,8 @@ void DDCPStressUpdate::computeQpStress()
         drhoidgb[ia][ib] = 0.0;
         sum1 = sum1 + H[ia][ib]*(rho_m[ib] + rho_i[ib]);
       }
-      Real t3 = x_d*sqrt(sum1)/b_mag - k_dyn*rho_i[ia];
-      Real t4 = 1.0e0 - dt_incr*abs(gamma_dot[ia])*0.5*x_d*H[ia][ia]/b_mag/sqrt(sum1) + k_dyn*dt_incr*abs(gamma_dot[ia]);
+      Real t3 = k_I*sqrt(sum1)/b_mag - k_D*rho_i[ia];
+      Real t4 = 1.0e0 - dt_incr*abs(gamma_dot[ia])*0.5*k_I*H[ia][ia]/b_mag/sqrt(sum1) + k_D*dt_incr*abs(gamma_dot[ia]);
 
       drhoidgb[ia][ia] = t3*sgn(gamma_dot[ia])*dt_incr/t4;
     }
@@ -703,10 +703,10 @@ void DDCPStressUpdate::computeQpStress()
     // backstress
     for(unsigned int ia = 0; ia < _num_slip_sys; ia++) {
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
-        dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1*(0.5*(q_t*G*b_mag)/sqrt(rho_m[ia] + rho_i[ia]))*dt_incr*(drhomdgb[ia][ib] + drhoidgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
+        dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1*(0.5*(k_rho*G*b_mag)/sqrt(rho_m[ia] + rho_i[ia]))*dt_incr*(drhomdgb[ia][ib] + drhoidgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
       }
 
-      dbsdgb[ia][ia] = dbsdgb[ia][ia] + k_bs1*q_t*G*b_mag*dt_incr*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress[ia])*sgn(gamma_dot[ia]) - k_bs2*dt_incr*  bstress[ia]*sgn(gamma_dot[ia]);
+      dbsdgb[ia][ia] = dbsdgb[ia][ia] + k_bs1*k_rho*G*b_mag*dt_incr*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress[ia])*sgn(gamma_dot[ia]) - k_bs2*dt_incr*  bstress[ia]*sgn(gamma_dot[ia]);
     }
 
     for(unsigned int ia = 0; ia < _num_slip_sys; ia++) {
@@ -729,7 +729,7 @@ void DDCPStressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
         sum1 = sum1 + p0*A[ia][ib]*(rho_m[ib] + rho_i[ib]);
 
-        dsadgb[ia][ib] = 0.5*q_t*G*b_mag*(p0*A[ia][ib]*(drhomdgb[ia][ib]
+        dsadgb[ia][ib] = 0.5*k_rho*G*b_mag*(p0*A[ia][ib]*(drhomdgb[ia][ib]
           + drhoidgb[ia][ib])/sqrt(sum1));
       }
     }
@@ -1354,10 +1354,10 @@ void DDCPStressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::
     for(unsigned int ib = 0; ib < num_slip_sys; ib++) {
       sum1 = sum1 + H[ia][ib]*(rho_m0[ib] + rho_i0[ib]);
     }
-    drhomdt[ia] = (k_mul/b_mag/d_disl[ia] - k_ann*R_c*rho_m0[ia]/b_mag
-      - (x_d*sqrt(sum1))/b_mag)*abs(gdt[ia]);
+    drhomdt[ia] = (k_M/b_mag/d_disl[ia] - k_ann*R_c*rho_m0[ia]/b_mag
+      - (k_I*sqrt(sum1))/b_mag)*abs(gdt[ia]);
 
-    drhoidt[ia] = ((x_d*sqrt(sum1))/b_mag - k_dyn*rho_i0[ia])*abs(gdt[ia]);
+    drhoidt[ia] = ((k_I*sqrt(sum1))/b_mag - k_D*rho_i0[ia])*abs(gdt[ia]);
   }
 
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
@@ -1373,7 +1373,7 @@ void DDCPStressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::
 
   // Calculate the back stress for each slip system.
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
-    dbstressdt[ia] = (k_bs1*q_t*G*b_mag*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress0[ia]) - k_bs2*bstress0[ia])*abs(gdt[ia]);
+    dbstressdt[ia] = (k_bs1*k_rho*G*b_mag*sqrt(rho_m[ia] + rho_i[ia])*sgn(tau[ia] - bstress0[ia]) - k_bs2*bstress0[ia])*abs(gdt[ia]);
 
     bstress[ia] = bstress0[ia] + dbstressdt[ia]*dt;
   }
@@ -1384,7 +1384,7 @@ void DDCPStressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::
     for(unsigned int ib = 0; ib < num_slip_sys; ib++) {
       sum1 = sum1 + p0*A[ia][ib]*(rho_m[ib] + rho_i[ib]);
     }
-    s_a[ia] = tau0 + hp_coeff/sqrt(grain_size) + q_t*G*b_mag*sqrt(sum1);
+    s_a[ia] = tau0 + hp_coeff/sqrt(grain_size) + k_rho*G*b_mag*sqrt(sum1);
   }
 
   // Calculate thermal slip resistance for each slip system.
@@ -1489,8 +1489,8 @@ void DDCPStressUpdate::assignProperties(){
 
   frictional_stress = _properties[_qp][16]; // Lattice frictional resistance
   p0 = _properties[_qp][17];  // Dislocation barrier strength
-  q_t = _properties[_qp][18];  // Taylor hardening parameter
-  x_d = _properties[_qp][19];  // Mean free path constant (dislocation network)
+  k_rho = _properties[_qp][18];  // Taylor hardening parameter
+  k_I = _properties[_qp][19];  // Mean free path constant (dislocation network)
 
   Alatent = _properties[_qp][20];  // Latent hardening coefficient
 
@@ -1498,10 +1498,10 @@ void DDCPStressUpdate::assignProperties(){
   rho_m_zero = _properties[_qp][21];  // Initial mobile dislocation density
   rho_i_zero = _properties[_qp][22];  // Initial immobile dislocation density
   d_disl_zero = _properties[_qp][23];  // Initial dislocation line length
-  k_mul = _properties[_qp][24]; // Dislocation line generation constant
+  k_M = _properties[_qp][24]; // Dislocation line generation constant
   R_c = _properties[_qp][25];  // Critical capture radius for dislocation annihilation
   k_ann = _properties[_qp][26];  // Dislocation evolution annihilation constant
-  k_dyn = _properties[_qp][27];  // Immobile dislocation evolution dynamic recovery constant
+  k_D = _properties[_qp][27];  // Immobile dislocation evolution dynamic recovery constant
   k_bs1 = _properties[_qp][28];  // Backstress evolution constant 1
   k_bs2 = _properties[_qp][29];  // Backstress evolution constant 2
 

@@ -84,7 +84,7 @@ protected:
   Real tolerance;
 
   // Material parameters
-  Real C11, C11_perK, C12, C12_perK, C13, C13_perK, C33, C33_perK, C44, C44_perK, G, G_perK, ca_ratio, b_mag[4], gammadot0g[4], enthalpy_const[4], p[4], q[4], p0[4], tau0[4], hp_coeff[4], grain_size[4], frictional_stress[4], q_t[4], x_d[4], Alatent[4], rho_m_zero[4], rho_i_zero[4], d_disl_zero[4], k_mul[4], R_c[4], k_ann[4], k_dyn[4], k_bs1[4], k_bs2[4], B_k, freq, tau_twin, drag_twin0, drag_twin_reorient, drag_twin, gd0twin, exp_twin, gamma_twin, twin_frac_reorient, twin_hard, twin_hard_exp;
+  Real C11, C11_perK, C12, C12_perK, C13, C13_perK, C33, C33_perK, C44, C44_perK, G, G_perK, ca_ratio, b_mag[4], gammadot0g[4], enthalpy_const[4], p[4], q[4], p0[4], tau0[4], hp_coeff[4], grain_size[4], frictional_stress[4], k_rho[4], k_I[4], Alatent[4], rho_m_zero[4], rho_i_zero[4], d_disl_zero[4], k_M[4], R_c[4], k_ann[4], k_D[4], k_bs1[4], k_bs2[4], B_k, freq, tau_twin, drag_twin0, drag_twin_reorient, drag_twin, gd0twin, exp_twin, gamma_twin, twin_frac_reorient, twin_hard, twin_hard_exp;
 
   Real sse;
 };
