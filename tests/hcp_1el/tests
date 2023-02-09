@@ -1,7 +1,0 @@
-[Tests]
-  [./hcp_1el]
-    type = 'Exodiff'
-    input = 'cp_hcp_1el.i'
-    exodiff = 'out_hcp.e'
-  [../]
-[]

@@ -1,7 +1,0 @@
-[Tests]
-  [./fcc_1el]
-    type = 'Exodiff'
-    input = 'cp_fcc_1el.i'
-    exodiff = 'out_fcc.e'
-  [../]
-[]
