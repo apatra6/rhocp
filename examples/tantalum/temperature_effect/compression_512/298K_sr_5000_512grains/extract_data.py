@@ -12,7 +12,7 @@ import pandas as pd
 import csv
 import time
 
-EXODUS_FILE = "/home/anirban/projects/rhocp/examples/tantalum/temperature_effect/298K_sr_5000_512grains/out_298K.e"
+EXODUS_FILE = "/home/anirban/projects/rhocp/examples/tantalum/temperature_effect/compression_512/298K_sr_5000_512grains/out_298K.e"
 
 exodusHandle = exodus(EXODUS_FILE, 'r', array_type='numpy')
 timesteps = exodusHandle.num_times()
@@ -100,7 +100,7 @@ def main():
 
 	all_data = pd.concat(stress_strain_values_map)
 	print(all_data.dtypes)
-	all_data.to_csv("/home/anirban/projects/rhocp/examples/tantalum/temperature_effect/298K_sr_5000_512grains/exodus_data_output.csv", index=False)
+	all_data.to_csv("/home/anirban/projects/rhocp/examples/tantalum/temperature_effect/compression_512/298K_sr_5000_512grains/exodus_data_output.csv", index=False)
 
 
 if __name__ == '__main__':
