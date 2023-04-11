@@ -3,10 +3,10 @@
 
 registerMooseObject("RhocpApp", EffectiveElasticStrain);
 
-template<>
-InputParameters validParams<EffectiveElasticStrain>()
+InputParameters
+EffectiveElasticStrain::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   return params;
 }
 

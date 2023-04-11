@@ -4,11 +4,6 @@
 #include "EulerAngleProvider.h"
 #include "EBSDAccessFunctors.h"
 
-class EBSDMeshReader;
-
-template <>
-InputParameters validParams<EBSDMeshReader>();
-
 /**
  * A GeneralUserObject that reads an EBSD file and stores the centroid
  * data in a data structure which indexes on element centroids.

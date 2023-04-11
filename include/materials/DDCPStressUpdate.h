@@ -2,15 +2,11 @@
 #include "EulerAngleReader.h"
 #include "EBSDMeshReader.h"
 
-//Forward Declaration
-class DDCPStressUpdate;
-
-template<>
-InputParameters validParams<DDCPStressUpdate>();
-
 class DDCPStressUpdate : public ComputeStressBase
 {
 public:
+  static InputParameters validParams();
+
   DDCPStressUpdate(const InputParameters & parameters);
   virtual ~DDCPStressUpdate();
 

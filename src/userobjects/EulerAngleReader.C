@@ -4,11 +4,10 @@
 
 registerMooseObject("RhocpApp", EulerAngleReader);
 
-template <>
 InputParameters
-validParams<EulerAngleReader>()
+EulerAngleReader::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Read Euler angles from a file and provide it to other objects.");
   params.addRequiredParam<FileName>("file_name", "Euler angle data file name");
   return params;

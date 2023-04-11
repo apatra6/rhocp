@@ -3,11 +3,10 @@
 
 registerMooseObject("RhocpApp", GrainAverageValue);
 
-template <>
 InputParameters
-validParams<GrainAverageValue>()
+GrainAverageValue::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<unsigned int>("grain_id", "Grain number");
   params.addRequiredParam<UserObjectName>("EBSDFileReader", "Name of the EBSDReader UO");
   return params;

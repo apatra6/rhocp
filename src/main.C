@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
   // Create an instance of the application and store it in a smart pointer for easy cleanup
   std::shared_ptr<MooseApp> app = AppFactory::createAppShared("RhocpApp", argc, argv);
 
-  app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
 
   // Execute the application

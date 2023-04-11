@@ -2,11 +2,10 @@
 
 registerMooseObject("RhocpApp", ElementNormalizedValue);
 
-template <>
 InputParameters
-validParams<ElementNormalizedValue>()
+ElementNormalizedValue::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   return params;
 }
 

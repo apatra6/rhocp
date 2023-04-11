@@ -3,17 +3,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
-
-class OutputEuler;
-template<>
-InputParameters validParams<OutputEuler>();
-/**
- * Constant auxiliary value
- */
 class OutputEuler : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   OutputEuler(const InputParameters & parameters);
   virtual ~OutputEuler() {}
 

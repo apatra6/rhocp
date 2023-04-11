@@ -9,10 +9,10 @@
 
 registerMooseObject("RhocpApp", DDCPHCPStressUpdate);
 
-template<>
-InputParameters validParams<DDCPHCPStressUpdate>()
+InputParameters
+DDCPHCPStressUpdate::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Stress calculation using the Crystal Plasticity Material");
   params.addRequiredParam<FileName>("propsFile", "The file with the material parameters");
   params.addRequiredParam<FileName>("slipSysFile", "The file with the crystallography of slip systems");
@@ -816,8 +816,8 @@ void DDCPHCPStressUpdate::computeQpStress()
           gamma_bar = gamma_bar + 0.5*(xs[i][k]*xm[j][k] + xs[j][k]*xm[i][k])*E_p(i,j);
         }
       }
+      drag_twin_reorient = drag_twin0 + twin_hard*(power(gamma_bar/gamma_twin_ref,twin_hard_exp) - 1.e0);
     }
-    drag_twin_reorient = drag_twin0 + twin_hard*(power(gamma_bar/gamma_twin_ref,twin_hard_exp) - 1.e0);
   }
   }
 

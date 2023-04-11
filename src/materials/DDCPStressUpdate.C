@@ -9,10 +9,10 @@
 
 registerMooseObject("RhocpApp", DDCPStressUpdate);
 
-template<>
-InputParameters validParams<DDCPStressUpdate>()
+InputParameters
+DDCPStressUpdate::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Stress calculation using the Crystal Plasticity Material");
   params.addRequiredParam<FileName>("propsFile", "The file with the material parameters");
   params.addRequiredParam<FileName>("slipSysFile", "The file with the crystallography of slip systems");

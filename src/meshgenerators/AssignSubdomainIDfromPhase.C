@@ -8,11 +8,10 @@
 
 registerMooseObject("RhocpApp", AssignSubdomainIDfromPhase);
 
-template <>
 InputParameters
-validParams<AssignSubdomainIDfromPhase>()
+AssignSubdomainIDfromPhase::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<FileName>("EBSDFilename","Name of the EBSD mesh file");
   return params;

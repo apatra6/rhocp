@@ -4,19 +4,11 @@
 #include "AuxKernel.h"
 #include "EBSDMeshReader.h"
 
-// Forward Declarations
-class EBSDMeshReaderPointDataAux;
-
-template <>
-InputParameters validParams<EBSDMeshReaderPointDataAux>();
-
-/**
- * This kernel makes data from the EBSDReader GeneralUserObject available
- * as AuxVariables.
- */
 class EBSDMeshReaderPointDataAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
+  static InputParameters validParams();
+
   EBSDMeshReaderPointDataAux(const InputParameters & parameters);
 
 protected:

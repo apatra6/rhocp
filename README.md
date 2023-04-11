@@ -8,7 +8,9 @@
 
 &rho;-CP is a crystal plasticity solver that interfaces with the open source finite element solver, MOOSE (https://github.com/idaholab/moose), for crystal plasticity finite element modeling of anisotropic, heterogeneous deformation in polycrystalline ensembles. Source codes for the dislocation density-based crystal plasticity solver are provided in this repository, along with example applications for the thermo-mechanical deformation of hcp magnesium single and polycrystals, polycrystalline fcc OFHC copper and polycrystalline bcc tantalum.
 
-Details of the constitutive model and numerical implementation are available at: https://arxiv.org/abs/2303.02441
+Details of the constitutive model and numerical implementation are available at:
+https://doi.org/10.1016/j.commatsci.2023.112182
+https://arxiv.org/abs/2303.02441
 
 ## Installation
 The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_started/installation/index.html), then clone and compile &rho;-CP alongside MOOSE in the `projects` directory:
@@ -24,3 +26,6 @@ The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_st
 - Simulations can be run using the following example command: `mpiexec -n 4 ~/projects/rhocp/rhocp-opt -i Cu_compression_sim.i` for running the example given in  `rhocp/examples/copper/strain_rate_effect/compression_sr_1e-1ps/`.
 - Output files in the form of `.csv` files can be used for plotting averaged values of various quantities and Exodus `.e` files can be visualized using Paraview (https://www.paraview.org/) for the deformation contours (the user is advised to use Paraview version 5.9 or lower).
 - Spatio-temporal data can also be extracted from the `.e` output files using the Python SEACAS (https://github.com/sandialabs/seacas) libraries (an example script `extract_data.py` is provided in `examples/tantalum/temperature_effect/compression_512/298K_sr_5000_512grains`) or using the GUI-based data extraction tools in Paraview.
+
+## Citation
+Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.

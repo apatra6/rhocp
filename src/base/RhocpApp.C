@@ -5,10 +5,10 @@
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
-template<>
-InputParameters validParams<RhocpApp>()
+InputParameters
+RhocpApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
   return params;
 }
 

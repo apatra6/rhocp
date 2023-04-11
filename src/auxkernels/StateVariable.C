@@ -2,10 +2,10 @@
 
 registerMooseObject("RhocpApp", StateVariable);
 
-template<>
-InputParameters validParams<StateVariable>()
+InputParameters
+StateVariable::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<unsigned int>("sdv_id", "State variable number");
   return params;
 }

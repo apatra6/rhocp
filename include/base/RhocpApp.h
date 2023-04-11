@@ -3,14 +3,11 @@
 
 #include "MooseApp.h"
 
-class RhocpApp;
-
-template<>
-InputParameters validParams<RhocpApp>();
-
 class RhocpApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   RhocpApp(const InputParameters & parameters);
   virtual ~RhocpApp();
 

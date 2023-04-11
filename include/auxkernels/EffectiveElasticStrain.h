@@ -3,17 +3,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
-
-class EffectiveElasticStrain;
-template<>
-InputParameters validParams<EffectiveElasticStrain>();
-/**
- * Constant auxiliary value
- */
 class EffectiveElasticStrain : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   EffectiveElasticStrain(const InputParameters & parameters);
   virtual ~EffectiveElasticStrain() {}
 

@@ -2,10 +2,10 @@
 
 registerMooseObject("RhocpApp", OutputEuler);
 
-template<>
-InputParameters validParams<OutputEuler>()
+InputParameters
+OutputEuler::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<unsigned int>("angle_id", "Euler angle id");
   return params;
 }

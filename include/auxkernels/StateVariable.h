@@ -3,17 +3,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
-
-class StateVariable;
-template<>
-InputParameters validParams<StateVariable>();
-/**
- * Constant auxiliary value
- */
 class StateVariable : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   StateVariable(const InputParameters & parameters);
   virtual ~StateVariable() {}
 

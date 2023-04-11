@@ -14,11 +14,10 @@
 
 registerMooseObject("RhocpApp", EBSDMeshReader);
 
-template <>
 InputParameters
-validParams<EBSDMeshReader>()
+EBSDMeshReader::validParams()
 {
-  InputParameters params = validParams<EulerAngleProvider>();
+  InputParameters params = EulerAngleProvider::validParams();
   params.addClassDescription("Load and manage DREAM.3D EBSD data files for running simulations on "
                              "reconstructed microstructures.");
   params.addParam<unsigned int>(

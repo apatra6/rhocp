@@ -4,21 +4,11 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "EBSDMeshReader.h"
 
-// Forward Declarations
-class GrainAverageValue;
-
-template <>
-InputParameters validParams<GrainAverageValue>();
-
-/**
- * This postprocessor computes a volume integral of the specified variable.
- *
- * Note that specializations of this integral are possible by deriving from this
- * class and overriding computeQpIntegral().
- */
 class GrainAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   GrainAverageValue(const InputParameters & parameters);
 
   virtual void initialize() override;

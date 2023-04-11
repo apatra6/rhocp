@@ -5,12 +5,6 @@
 #include "MeshGenerator.h"
 #include "EBSDAccessFunctors.h"
 
-// Forward declerations
-class AssignSubdomainIDfromFeature;
-
-template <>
-InputParameters validParams<AssignSubdomainIDfromFeature>();
-
 /**
  * MeshGenerator for assigning a subdomain ID to all elements
  */
