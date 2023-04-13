@@ -12,6 +12,10 @@ Details of the constitutive model and numerical implementation are available at:
 https://doi.org/10.1016/j.commatsci.2023.112182
 https://arxiv.org/abs/2303.02441
 
+Details of the material properties/model parameters and their input to the model are given in: <a href="rhoCP_model_parameters.pdf" target="_blank">Model Parameters</a>
+
+![Screenshot](rhoCP_graphic.png)
+
 ## Installation
 The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_started/installation/index.html), then clone and compile &rho;-CP alongside MOOSE in the `projects` directory:
 - The source files can be obtained either using the following command: `git clone https://github.com/apatra6/rhocp.git` or directly downloading the repository from github.
