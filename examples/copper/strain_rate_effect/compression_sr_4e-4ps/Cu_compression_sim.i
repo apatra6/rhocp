@@ -209,7 +209,7 @@
 [Functions]
   [./top_push]
     type = ParsedFunction
-    value = '-0.4*0.0004' # 0.4 is the sample dimension, 4e-4/s is the strain rate
+    expression = '-0.4*0.0004' # 0.4 is the sample dimension, 4e-4/s is the strain rate
   [../]
 
   [./dts]

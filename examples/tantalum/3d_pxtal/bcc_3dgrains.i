@@ -220,7 +220,7 @@
 [Functions]
   [./top_pull]
     type = ParsedFunction
-    value = '0.001*15.0' # 15 is the sample dimension, 1e-3/s is the strain rate
+    expression = '0.001*15.0' # 15 is the sample dimension, 1e-3/s is the strain rate
   [../]
 
   [./dts]

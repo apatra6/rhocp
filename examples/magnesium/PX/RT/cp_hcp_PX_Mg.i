@@ -341,7 +341,7 @@
 [Functions]
   [./top_push]
     type = ParsedFunction
-    value = '-0.00008'
+    expression = '-0.00008'
   [../]
   [./traction_function]
     type = PiecewiseLinear

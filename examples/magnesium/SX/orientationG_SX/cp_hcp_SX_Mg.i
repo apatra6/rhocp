@@ -371,7 +371,7 @@
 [Functions]
   [./top_push]
     type = ParsedFunction
-    value = '-0.0001' # 1 is the sample dimension, 1e-4/s is the strain
+    expression = '-0.0001' # 1 is the sample dimension, 1e-4/s is the strain
   [../]
   [./dts]
     type = PiecewiseLinear

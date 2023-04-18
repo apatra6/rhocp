@@ -263,7 +263,7 @@
 [Functions]
   [./pull]
     type = ParsedFunction
-    value = '5280*1.0e-3' # 5280 \mu m is the sample dimension, 1e-3/s is the strain rate
+    expression = '5280*1.0e-3' # 5280 \mu m is the sample dimension, 1e-3/s is the strain rate
   [../]
 
   [./dts]
