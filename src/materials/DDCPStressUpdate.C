@@ -268,7 +268,7 @@ void DDCPStressUpdate::computeQpStress()
 
     // Initialize E_p.
     for (unsigned int i = 0; i < 3; i++) {
-      for(unsigned int j = 1; j < 3; j++) {
+      for(unsigned int j = 0; j < 3; j++) {
         E_p(i,j) = 0;
       }
     }
