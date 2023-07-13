@@ -1,6 +1,7 @@
 #include "ComputeStressBase.h"
 #include "EulerAngleReader.h"
 #include "EBSDMeshReader.h"
+#include "GrainAreaSize.h"
 
 class DDCPHCPStressUpdate : public ComputeStressBase
 {
@@ -26,7 +27,9 @@ protected:
 
   const EulerAngleReader * _EulerAngFileReader;
   const EBSDMeshReader * _EBSDFileReader;
+  const GrainAreaSize * _GrainAreaSize;
 
+  Real _grain_size;
   int _isEulerRadian;
   int _isEulerBunge;
   unsigned int _iReorientTwin;

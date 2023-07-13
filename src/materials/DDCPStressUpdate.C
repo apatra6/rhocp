@@ -13,7 +13,7 @@ InputParameters
 DDCPStressUpdate::validParams()
 {
   InputParameters params = ComputeStressBase::validParams();
-  params.addClassDescription("Stress calculation using the Crystal Plasticity Material");
+  params.addClassDescription("Stress calculation using the Crystal Plasticity material model for FCC and BCC crystals");
   params.addRequiredParam<FileName>("propsFile", "The file with the material parameters");
   params.addRequiredParam<FileName>("slipSysFile", "The file with the crystallography of slip systems");
   params.addRequiredParam<unsigned int>("num_props", "The number of material properties this UMAT is going to use");
@@ -24,6 +24,7 @@ DDCPStressUpdate::validParams()
   params.addCoupledVar("temp", 300, "Temperature");
   params.addParam<UserObjectName>("EulerAngFileReader", "Name of the EulerAngleReader UO");
   params.addParam<UserObjectName>("EBSDFileReader", "Name of the EBSDReader UO");
+  params.addParam<UserObjectName>("GrainAreaSize", "Name of the GrainAreaSize UO");
   params.addParam<int>("isEulerRadian", 0, "Are Euler angles specified in radians");
   params.addParam<int>("isEulerBunge", 0, "Are Euler angles specified in Bunge notation");
   return params;
@@ -44,6 +45,9 @@ DDCPStressUpdate::DDCPStressUpdate(const InputParameters & parameters) :
                                : NULL),
     _EBSDFileReader(isParamValid("EBSDFileReader")
                                ? &getUserObject<EBSDMeshReader>("EBSDFileReader")
+                               : NULL),
+    _GrainAreaSize(isParamValid("GrainAreaSize")
+                               ? &getUserObject<GrainAreaSize>("GrainAreaSize")
                                : NULL),
     _isEulerRadian(getParam<int>("isEulerRadian")),
     _isEulerBunge(getParam<int>("isEulerBunge")),
@@ -166,12 +170,6 @@ void DDCPStressUpdate::computeQpStress()
   std::copy(_y_old[_qp].begin(), _y_old[_qp].end(), _y[_qp].begin());
   std::copy(_z_old[_qp].begin(), _z_old[_qp].end(), _z[_qp].begin());
 
-  // Read in material parameters
-  if (_t_step <= 1){
-      readPropsFile();
-  }
-  assignProperties();
-
   if (_t_step <= 1) {
   // read in Euler angles
   if (_EBSDFileReader){
@@ -194,7 +192,21 @@ void DDCPStressUpdate::computeQpStress()
   else{
       mooseError("Euler angle data not found.");
   }
+
+  // read grain size, available
+  if (_GrainAreaSize){
+    _grain_size = _GrainAreaSize->getGrainSize(_grainid);
   }
+  else{
+    _grain_size = 1.e10;
+  }
+  }
+
+  // Read in material parameters
+  if (_t_step <= 1){
+      readPropsFile();
+  }
+  assignProperties();
 
   // Initialize Kronecker delta tensor
   Real del[3][3];
@@ -1208,6 +1220,18 @@ void DDCPStressUpdate::computeQpStress()
     _state_var[_qp][n] = bstress[i];
   }
 
+  // elasticity tensor
+  for (unsigned int i = 0; i < 3; ++i){
+    for (unsigned int j = 0; j < 3; ++j){
+      for (unsigned int k = 0; k < 3; ++k){
+	    for (unsigned int l = 0; l < 3; ++l){
+	      // Double check
+	      _Cel_cp[_qp](i,j,k,l) = C[i][j][k][l];
+	    }
+      }
+    }
+  }
+
 } // End computeStress()
 
 // NR_residual()
@@ -1485,8 +1509,14 @@ void DDCPStressUpdate::assignProperties(){
   // Hardening parameters
   tau0 = _properties[_qp][13];  // Athermal slip resistance constant
   hp_coeff = _properties[_qp][14];  // Hall-Petch coefficient <TBA>
-  grain_size = _properties[_qp][15];  // Grain size (for Hall-Petch term) <TBA>
-
+//   if (_grain_size >= 1.e10) {
+  if (! _GrainAreaSize){
+    grain_size = _properties[_qp][15];  // Grain size (for Hall-Petch term) <TBA>
+  }
+  else {
+    // if the GrainAreaSize object exists, then grain_size is taken directly from the mesh
+    grain_size = _grain_size;
+  }
   frictional_stress = _properties[_qp][16]; // Lattice frictional resistance
   p0 = _properties[_qp][17];  // Dislocation barrier strength
   k_rho = _properties[_qp][18];  // Taylor hardening parameter

@@ -13,7 +13,7 @@ InputParameters
 DDCPHCPStressUpdate::validParams()
 {
   InputParameters params = ComputeStressBase::validParams();
-  params.addClassDescription("Stress calculation using the Crystal Plasticity Material");
+  params.addClassDescription("Stress calculation using the Crystal Plasticity material model for HCP crystals");
   params.addRequiredParam<FileName>("propsFile", "The file with the material parameters");
   params.addRequiredParam<FileName>("slipSysFile", "The file with the crystallography of slip systems");
   params.addRequiredParam<unsigned int>("num_props", "The number of material properties this UMAT is going to use");
@@ -25,6 +25,7 @@ DDCPHCPStressUpdate::validParams()
   params.addCoupledVar("temp", 300, "Temperature");
   params.addParam<UserObjectName>("EulerAngFileReader", "Name of the EulerAngleReader UO");
   params.addParam<UserObjectName>("EBSDFileReader", "Name of the EBSDReader UO");
+  params.addParam<UserObjectName>("GrainAreaSize", "Name of the GrainAreaSize UO");
   params.addParam<int>("isEulerRadian", 0, "Are Euler angles specified in radians");
   params.addParam<int>("isEulerBunge", 0, "Are Euler angles specified in Bunge notation");
   params.addParam<unsigned int>("iReorientTwin", 0, "Allow twin reorientation");
@@ -47,6 +48,9 @@ DDCPHCPStressUpdate::DDCPHCPStressUpdate(const InputParameters & parameters) :
                                : NULL),
     _EBSDFileReader(isParamValid("EBSDFileReader")
                                ? &getUserObject<EBSDMeshReader>("EBSDFileReader")
+                               : NULL),
+    _GrainAreaSize(isParamValid("GrainAreaSize")
+                               ? &getUserObject<GrainAreaSize>("GrainAreaSize")
                                : NULL),
     _isEulerRadian(getParam<int>("isEulerRadian")),
     _isEulerBunge(getParam<int>("isEulerBunge")),
@@ -178,12 +182,6 @@ void DDCPHCPStressUpdate::computeQpStress()
   std::copy(_y_old[_qp].begin(), _y_old[_qp].end(), _y[_qp].begin());
   std::copy(_z_old[_qp].begin(), _z_old[_qp].end(), _z[_qp].begin());
 
-  // Read in material parameters
-  if (_t_step <= 1){
-      readPropsFile();
-  }
-  assignProperties();
-
   if (_t_step <= 1){
   // read in Euler angles
   if (_EBSDFileReader){
@@ -206,7 +204,21 @@ void DDCPHCPStressUpdate::computeQpStress()
   else{
       mooseError("Euler angle data not found.");
   }
+
+  // read grain size, available
+  if (_GrainAreaSize){
+    _grain_size = _GrainAreaSize->getGrainSize(_grainid);
   }
+  else{
+    _grain_size = 1.e10;
+  }
+  }
+
+  // Read in material parameters
+  if (_t_step <= 1){
+      readPropsFile();
+  }
+  assignProperties();
 
   // Initialize Kronecker delta tensor
   Real del[3][3];
@@ -1527,6 +1539,18 @@ void DDCPHCPStressUpdate::computeQpStress()
     _state_var[_qp][n] = g_isx[i];
   }
 
+  // elasticity tensor
+  for (unsigned int i = 0; i < 3; ++i){
+    for (unsigned int j = 0; j < 3; ++j){
+      for (unsigned int k = 0; k < 3; ++k){
+	    for (unsigned int l = 0; l < 3; ++l){
+	      // Double check
+	      _Cel_cp[_qp](i,j,k,l) = C[i][j][k][l];
+	    }
+      }
+    }
+  }
+
 } // End computeStress()
 
 // NR_residual()
@@ -1858,8 +1882,14 @@ void DDCPHCPStressUpdate::assignProperties(){
   // Hardening parameters
   tau0[i] = _properties[_qp][12 + 22*i + 6];  // Athermal slip resistance constant
   hp_coeff[i] = _properties[_qp][12 + 22*i + 7];  // Hall-Petch coefficient <TBA>
-  grain_size[i] = _properties[_qp][12 + 22*i + 8];  // Grain size (for Hall-Petch term) <TBA>
-
+  //   if (_grain_size >= 1.e10) {
+  if (! _GrainAreaSize){
+    grain_size[i] = _properties[_qp][12 + 22*i + 8];  // Grain size (for Hall-Petch term) <TBA>
+  }
+  else {
+    // if the GrainAreaSize object exists, then grain_size is taken directly from the mesh
+    grain_size[i] = _grain_size;
+  }
   frictional_stress[i] = _properties[_qp][12 + 22*i + 9]; // Lattice frictional resistance
   p0[i] = _properties[_qp][12 + 22*i + 10];  // Dislcoation barrier strength
   k_rho[i] = _properties[_qp][12 + 22*i + 11];  // Taylor hardening parameter
