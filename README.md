@@ -41,5 +41,16 @@ for running the example given in  `rhocp/examples/copper/strain_rate_effect/comp
 - Output files in the form of `.csv` files can be used for plotting averaged values of various quantities and Exodus `.e` files can be visualized using Paraview (https://www.paraview.org/) for the deformation contours (the user is advised to use Paraview version 5.9 or lower).
 - Spatio-temporal data can also be extracted from the `.e` output files using the Python SEACAS (https://github.com/sandialabs/seacas) libraries (an example script `extract_data.py` is provided in `examples/tantalum/temperature_effect/compression_512/298K_sr_5000_512grains`) or using the GUI-based data extraction tools in Paraview.
 
-## Citation
-Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
+## References
+For the general &rho;-CP framework, refer to:
+
+- Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
+
+For the J<sub>2</sub> plasticity model, refer to: 
+- Ellis, B.D., Haider, H., Priddy, M.W., Patra, A., “Integrated computational design of three-phase Mo-Si-B alloy turbine blade for high-temperature aerospace applications”, Integrating Materials and Manufacturing Innovation, Vol. 10, 2021, pp. 245-264. 
+- Khandelwal, S., Basu, S., Patra, A., “A machine learning-based surrogate modeling framework for predicting the history-dependent deformation of dual phase microstructures”, Materials Today Communications, Vol. 29, 2021, 102914. 
+- Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522. 
+
+Numerical integration for the J<sub>2</sub> plasticity model can be inferred from: 
+
+- Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
