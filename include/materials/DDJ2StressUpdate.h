@@ -11,10 +11,10 @@ public:
 
 protected:
   FileName _propsFile;
-  FileName _slipSysFile;
+
+  const GrainAreaSize * _GrainAreaSize;
 
   unsigned int _num_props;
-  unsigned int _num_slip_sys;
   unsigned int _num_state_vars;
 
   int _grainid;
@@ -22,7 +22,6 @@ protected:
   const Real _tol;
   const VariableValue & _temp;
 
-  const GrainAreaSize * _GrainAreaSize;
   Real _grain_size;
 
   virtual void initQpStatefulProperties();
