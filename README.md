@@ -43,14 +43,16 @@ for running the example given in  `rhocp/examples/copper/strain_rate_effect/comp
 
 ## References
 For the general &rho;-CP framework, refer to:
-
 - Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
+
+For calculation of lattice strains, refer to Appendix A in:
+- Pokharel, R., Patra, A., Brown, D.W., Clausen, B., Vogel, S.C., Gray, G.T., “An analysis of phase stresses in additively manufactured 304L stainless steel using neutron diffraction measurements and crystal plasticity finite element simulations”, International Journal of Plasticity, Vol. 121, 2019, pp. 201-217.
 
 For the dislocation density-based J<sub>2</sub> plasticity model, refer to: 
 - Ellis, B.D., Haider, H., Priddy, M.W., Patra, A., “Integrated computational design of three-phase Mo-Si-B alloy turbine blade for high-temperature aerospace applications”, Integrating Materials and Manufacturing Innovation, Vol. 10, 2021, pp. 245-264. 
 - Khandelwal, S., Basu, S., Patra, A., “A machine learning-based surrogate modeling framework for predicting the history-dependent deformation of dual phase microstructures”, Materials Today Communications, Vol. 29, 2021, 102914. 
 - Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522. 
 
-Numerical integration for the J<sub>2</sub> plasticity model can be inferred from: 
+Numerical integration of the J<sub>2</sub> plasticity model can be inferred from: 
 
 - Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
