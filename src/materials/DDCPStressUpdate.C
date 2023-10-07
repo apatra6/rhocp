@@ -19,7 +19,7 @@ DDCPStressUpdate::validParams()
   params.addRequiredParam<unsigned int>("num_props", "The number of material properties this UMAT is going to use");
   params.addRequiredParam<unsigned int>("num_slip_sys", "The number of slip systems");
   params.addRequiredParam<unsigned int>("num_state_vars", "The number of state variables this UMAT is going to use");
-  params.addParam<unsigned int>("grainid", -1, "Grain id");
+  params.addParam<int>("grainid", -1, "Grain id");
   params.addParam<Real>("tol", 1.0e-6, "Tolerance");
   params.addCoupledVar("temp", 300, "Temperature");
   params.addParam<UserObjectName>("EulerAngFileReader", "Name of the EulerAngleReader UO");
