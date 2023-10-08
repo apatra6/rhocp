@@ -37,7 +37,7 @@ DDCPStressUpdate::DDCPStressUpdate(const InputParameters & parameters) :
     _num_props(getParam<unsigned int>("num_props")),
     _num_slip_sys(getParam<unsigned int>("num_slip_sys")),
     _num_state_vars(getParam<unsigned int>("num_state_vars")),
-    _grainid(getParam<unsigned int>("grainid")),
+    _grainid(getParam<int>("grainid")),
     _tol(getParam<Real>("tol")),
     _temp(coupledValue("temp")),
     _EulerAngFileReader(isParamValid("EulerAngFileReader")
