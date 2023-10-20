@@ -638,7 +638,7 @@ void DDCPStressUpdate::computeQpStress()
     iNR = iNR + 1;
     // converged = true;
 
-    NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_dot, F1, F_p_inv, F_p_inv_0, C, rho_m0, rho_m, rho_i0, rho_i, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse);
+    NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_dot, F1, F_el, F_p_inv, F_p_inv_0, C, rho_m0, rho_m, rho_i0, rho_i, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse);
 
     sse_ref = sse;
 
@@ -818,7 +818,7 @@ void DDCPStressUpdate::computeQpStress()
         gamma_try[k] = gamma_try_g[k];
       }
 
-      NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_try, F1, F_p_inv, F_p_inv_0, C, rho_m0, rho_m, rho_i0, rho_i, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse);
+      NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_try, F1, F_el, F_p_inv, F_p_inv_0, C, rho_m0, rho_m, rho_i0, rho_i, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse);
 
       if ((sse_old <= sse_ref) && (sse >= sse_old) && (N_ctr > 0)) {
         improved = true;
@@ -1235,12 +1235,12 @@ void DDCPStressUpdate::computeQpStress()
 } // End computeStress()
 
 // NR_residual()
-void DDCPStressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gdt, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv_0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &rho_i0, std::vector<Real> &rho_i, std::vector<Real> &bstress0, std::vector<Real> &bstress, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse){
+void DDCPStressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gdt, RankTwoTensor F1, RankTwoTensor &F_el, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv_0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &rho_i0, std::vector<Real> &rho_i, std::vector<Real> &bstress0, std::vector<Real> &bstress, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse){
 
   Real xL_p_inter[3][3];
   std::vector<Real> shr_g(num_slip_sys);
 
-  RankTwoTensor F_el;
+  // RankTwoTensor F_el;
   RankTwoTensor E_el;
   RankTwoTensor Spk2;
 

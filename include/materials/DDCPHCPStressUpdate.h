@@ -76,7 +76,7 @@ protected:
   Real power(Real x, Real y);
   Real sgn(Real x);
 
-  void NR_residual (unsigned int num_slip_sys, unsigned int num_twin_sys, int &itvariant, bool &TwinAllowed, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gamma_dot, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &rho_i0, std::vector<Real> &rho_i, std::vector<Real> &bstress0, std::vector<Real> &bstress, std::vector<Real> &twin_fraction0, std::vector<Real> &twin_fraction, Real tot_twin_fraction, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse);
+  void NR_residual (unsigned int num_slip_sys, unsigned int num_twin_sys, int &itvariant, bool &TwinAllowed, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gamma_dot, RankTwoTensor F1, RankTwoTensor &F_el, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &rho_i0, std::vector<Real> &rho_i, std::vector<Real> &bstress0, std::vector<Real> &bstress, std::vector<Real> &twin_fraction0, std::vector<Real> &twin_fraction, Real tot_twin_fraction, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse);
 
   unsigned int isx(unsigned int islip);
 
