@@ -20,7 +20,6 @@ DDCPHCPStressUpdate::validParams()
   params.addRequiredParam<unsigned int>("num_slip_sys", "The number of slip systems (including twin systems)");
   params.addRequiredParam<unsigned int>("num_twin_sys", "The number of twin systems");
   params.addRequiredParam<unsigned int>("num_state_vars", "The number of state variables this UMAT is going to use");
-  params.addParam<int>("grainid", -1, "Grain id");
   params.addParam<Real>("tol", 1.0e-6, "Tolerance");
   params.addCoupledVar("temp", 300, "Temperature");
   params.addParam<UserObjectName>("EulerAngFileReader", "Name of the EulerAngleReader UO");
@@ -40,7 +39,6 @@ DDCPHCPStressUpdate::DDCPHCPStressUpdate(const InputParameters & parameters) :
     _num_slip_sys(getParam<unsigned int>("num_slip_sys")),
     _num_twin_sys(getParam<unsigned int>("num_twin_sys")),
     _num_state_vars(getParam<unsigned int>("num_state_vars")),
-    _grainid(getParam<int>("grainid")),
     _tol(getParam<Real>("tol")),
     _temp(coupledValue("temp")),
     _EulerAngFileReader(isParamValid("EulerAngFileReader")
@@ -194,9 +192,8 @@ void DDCPHCPStressUpdate::computeQpStress()
       psi[2] = data._phi2;
   }
   else if(_EulerAngFileReader){
-      if (_grainid == -1){
-          _grainid = _current_elem->subdomain_id();
-      }
+      _grainid = _current_elem->subdomain_id();
+
       psi[0] = _EulerAngFileReader->getData(_grainid,0);
       psi[1] = _EulerAngFileReader->getData(_grainid,1);
       psi[2] = _EulerAngFileReader->getData(_grainid,2);
