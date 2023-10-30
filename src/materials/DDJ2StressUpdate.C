@@ -18,7 +18,6 @@ DDJ2StressUpdate::validParams()
   params.addParam<UserObjectName>("GrainAreaSize", "Name of the GrainAreaSize UO");
   params.addRequiredParam<unsigned int>("num_props", "The number of material properties this UMAT is going to use");
   params.addRequiredParam<unsigned int>("num_state_vars", "The number of state variables this UMAT is going to use");
-  params.addParam<unsigned int>("grainid", -1, "Grain id");
   params.addParam<Real>("tol", 1.0e-6, "Tolerance");
   params.addCoupledVar("temp", 300, "Temperature");
   return params;
@@ -32,7 +31,6 @@ DDJ2StressUpdate::DDJ2StressUpdate(const InputParameters & parameters) :
                                : NULL),
     _num_props(getParam<unsigned int>("num_props")),
     _num_state_vars(getParam<unsigned int>("num_state_vars")),
-    _grainid(getParam<unsigned int>("grainid")),
     _tol(getParam<Real>("tol")),
     _temp(coupledValue("temp")),
     _state_var(declareProperty<std::vector<Real> >("state_var")),
@@ -1084,7 +1082,6 @@ void DDJ2StressUpdate::readPropsFile() {
   std::ifstream file_prop;
   file_prop.open(_propsFile.c_str());
 
-  // Assign slip system normals and slip directions for a BCC material
   for (unsigned int i = 0; i < _num_props; i++) {
     // file_prop >> _properties[_qp][i];
     if (!(file_prop >> _properties[_qp][i])) {

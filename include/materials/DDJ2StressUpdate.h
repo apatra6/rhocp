@@ -11,16 +11,13 @@ public:
 
 protected:
   FileName _propsFile;
-
   const GrainAreaSize * _GrainAreaSize;
-
   unsigned int _num_props;
   unsigned int _num_state_vars;
-
-  int _grainid;
-
   const Real _tol;
   const VariableValue & _temp;
+
+  int _grainid;
 
   Real _grain_size;
 
