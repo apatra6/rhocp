@@ -32,17 +32,16 @@ ElementNormalizedValue::execute()
 }
 
 Real
-ElementNormalizedValue::getValue()
+ElementNormalizedValue::getValue() const
 {
-  Real integral = ElementIntegralVariablePostprocessor::getValue();
+  return _integral_value / _volume;
+}
 
+void
+ElementNormalizedValue::finalize()
+{
+  gatherSum(_integral_value);
   gatherSum(_volume);
-
-  if (_volume == 0.0e0) {
-      _volume = 1.0e0;
-  }
-
-  return integral / _volume;
 }
 
 void
@@ -50,5 +49,9 @@ ElementNormalizedValue::threadJoin(const UserObject & y)
 {
   ElementIntegralVariablePostprocessor::threadJoin(y);
   const ElementNormalizedValue & pps = static_cast<const ElementNormalizedValue &>(y);
+
+//   const auto & pps = static_cast<const ElementNormalizedValue &>(y);
+
+  _integral_value += pps._integral_value;
   _volume += pps._volume;
 }

@@ -42,13 +42,16 @@ GrainAverageValue::execute()
 }
 
 Real
-GrainAverageValue::getValue()
+GrainAverageValue::getValue() const
 {
-  Real integral = ElementIntegralVariablePostprocessor::getValue();
+  return _integral_value / _volume;
+}
 
+void
+GrainAverageValue::finalize()
+{
+  gatherSum(_integral_value);
   gatherSum(_volume);
-
-  return integral / _volume;
 }
 
 void
@@ -56,5 +59,9 @@ GrainAverageValue::threadJoin(const UserObject & y)
 {
   ElementIntegralVariablePostprocessor::threadJoin(y);
   const GrainAverageValue & pps = static_cast<const GrainAverageValue &>(y);
+
+//   const auto & pps = static_cast<const GrainAverageValue &>(y);
+
+  _integral_value += pps._integral_value;
   _volume += pps._volume;
 }

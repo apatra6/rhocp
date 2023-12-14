@@ -24,7 +24,7 @@ RhocpApp::~RhocpApp() {}
 void
 RhocpApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ModulesApp::registerAll(f, af, s);
+  ModulesApp::registerAllObjects<RhocpApp>(f, af, s);
   Registry::registerObjectsTo(f, {"RhocpApp"});
   Registry::registerActionsTo(af, {"RhocpApp"});
 
