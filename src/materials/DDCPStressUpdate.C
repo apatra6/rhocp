@@ -26,6 +26,8 @@ DDCPStressUpdate::validParams()
   params.addParam<UserObjectName>("GrainAreaSize", "Name of the GrainAreaSize UO");
   params.addParam<int>("isEulerRadian", 0, "Are Euler angles specified in radians");
   params.addParam<int>("isEulerBunge", 0, "Are Euler angles specified in Bunge notation");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
   return params;
 }
 
@@ -50,6 +52,9 @@ DDCPStressUpdate::DDCPStressUpdate(const InputParameters & parameters) :
     _isEulerRadian(getParam<int>("isEulerRadian")),
     _isEulerBunge(getParam<int>("isEulerBunge")),
     _euler_ang(declareProperty<Point>("euler_ang")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _eigenstrains(_eigenstrain_names.size()),
+    _eigenstrains_old(_eigenstrain_names.size()),
     _state_var(declareProperty<std::vector<Real> >("state_var")),
     _state_var_old(getMaterialPropertyOld<std::vector<Real> >("state_var")),
     _properties(declareProperty<std::vector<Real> >("properties")),
@@ -65,6 +70,10 @@ DDCPStressUpdate::DDCPStressUpdate(const InputParameters & parameters) :
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _Cel_cp(declareProperty<RankFourTensor>("Cel_cp"))
 {
+  for (auto i : make_range(_eigenstrain_names.size())) {
+    _eigenstrains[i] = &getMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
+    _eigenstrains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
+  }
 }
 
 DDCPStressUpdate::~DDCPStressUpdate()
@@ -456,15 +465,29 @@ void DDCPStressUpdate::computeQpStress()
   // Initialize number of sub-increments.  Note that the subincrement initially equals the total increment. This remains the case unless the process starts to diverge.
   unsigned int N_incr, N_incr_total, iNR, N_ctr;
   Real dt_incr;
-  RankTwoTensor dfgrd0, dfgrd1;
+  RankTwoTensor dfgrd0, dfgrd1, Ftheta, Ftheta_old;
+  RankTwoTensor total_eigenstrain, total_eigenstrain_old;
   RankTwoTensor array1, array2;
   Real array1_matrix[3][3], array2_matrix[3][3];
 
   bool converged, improved;
 
   // Initialize deformation gradients for beginning and end of subincrement.
-  dfgrd0 = _deformation_gradient_old[_qp];
-  dfgrd1 = _deformation_gradient[_qp];
+  for (auto i : make_range(_eigenstrain_names.size())) {
+    total_eigenstrain += (*_eigenstrains[i])[_qp];
+    total_eigenstrain_old += (*_eigenstrains_old[i])[_qp];
+  }
+
+  Ftheta.zero();
+  Ftheta_old.zero();
+  for (int i=0; i<3; ++i)
+  {
+      Ftheta(i,i) = sqrt(1.0 + 2.0*total_eigenstrain(i,i));
+      Ftheta_old(i,i) = sqrt(1.0 + 2.0*total_eigenstrain_old(i,i));
+  }
+
+  dfgrd0 = _deformation_gradient_old[_qp] * Ftheta_old.inverse();
+  dfgrd1 = _deformation_gradient[_qp] * Ftheta.inverse();
   F0 = dfgrd0;
   F1 = dfgrd1;
 

@@ -420,7 +420,7 @@
 [UserObjects]
   [./euler_angle]
     type = EulerAngleReader
-    file_name = orientations2.in # orientations1 = 001, orientations2 = 110, orientations3 = 111
+    file_name = orientations1.in # orientations1 = 001, orientations2 = 110, orientations3 = 111
     execute_on = 'initial'
   [../]
   [./grain_size]
@@ -594,51 +594,51 @@
 
   # lattice strain outputs
   [./e110x]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e110x
   [../]
   [./e110y]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e110y
   [../]
   [./e110z]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e110z
   [../]
   [./e200x]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e200x
   [../]
   [./e200y]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e200y
   [../]
   [./e200z]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e200z
   [../]
   [./e211x]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e211x
   [../]
   [./e211y]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e211y
   [../]
   [./e211z]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e211z
   [../]
   [./e111x]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e111x
   [../]
   [./e111y]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e111y
   [../]
   [./e111z]
-    type = ElementAverageValue
+    type = ElementNormalizedValue # ElementAverageValue
     variable = e111z
   [../]
 []

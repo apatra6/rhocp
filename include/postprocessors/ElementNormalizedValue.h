@@ -1,5 +1,4 @@
-#ifndef ELEMENTNORMALIZEDVALUE_H
-#define ELEMENTNORMALIZEDVALUE_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -13,14 +12,10 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual Real getValue() const override;
-  virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  /// volume of the integration domain
   Real _volume;
-  /// the integral value that is being accumulated
-  Real _integral_value;
 };
 
-#endif

@@ -14,7 +14,9 @@ LatticeStrain::validParams()
   params.addRequiredParam<Real>("g0", "Diffraction vector: component 1");
   params.addRequiredParam<Real>("g1", "Diffraction vector: component 2");
   params.addRequiredParam<Real>("g2", "Diffraction vector: component 3");
-  params.addParam<Real>("tol", 7.5 , "Tolerance angle");
+  params.addParam<Real>("tol", 6.5 , "Tolerance angle");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
   return params;
 }
 
@@ -28,8 +30,13 @@ LatticeStrain::LatticeStrain(const InputParameters & parameters) :
     _g2(getParam<Real>("g2")),
     _tol(getParam<Real>("tol")),
     _state_var(getMaterialProperty<std::vector<Real> >("state_var")),
-    _euler_ang(getMaterialProperty<Point>("euler_ang"))
+    _euler_ang(getMaterialProperty<Point>("euler_ang")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _eigenstrains(_eigenstrain_names.size())
 {
+  for (auto i : make_range(_eigenstrain_names.size())) {
+    _eigenstrains[i] = &getMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
+  }
 }
 
 Real LatticeStrain::computeValue()
@@ -89,6 +96,18 @@ Real LatticeStrain::computeValue()
   elE(1,1) = elE(1,1) - 1.0;
   elE(2,2) = elE(2,2) - 1.0;
   elE = 0.5 * elE;
+
+  RankTwoTensor total_eigenstrain;
+  for (unsigned int i = 0; i < 3; i++) {
+    for (unsigned int j = 0; j < 3; j++) {
+      total_eigenstrain(i,j) = 0.e0;
+    }
+  }
+
+  for (auto i : make_range(_eigenstrain_names.size())) {
+    total_eigenstrain += (*_eigenstrains[i])[_qp];
+  }
+  elE = elE + total_eigenstrain;
 
   std::vector<Real> e_value(3);
   RankTwoTensor e_vector, N1, N2, N3;
@@ -154,13 +173,13 @@ Real LatticeStrain::computeValue()
         if (l!=k){
           if (N0[l][0]==N0[k][0] && N0[l][1]==N0[k][1] && N0[l][2]==N0[k][2])
           {
-            N0[k][0] = 0.0; N0[k][1] = 0.0; N0[k][2] = 0.0; 
+            N0[k][0] = 0.0; N0[k][1] = 0.0; N0[k][2] = 0.0;
           }
         }
     }
   }
 
-//--------------------------Normalizing vectors----------------------------  
+//--------------------------Normalizing vectors----------------------------
 
   for (unsigned int l=0; l<24; l++)
   {
@@ -180,12 +199,12 @@ Real LatticeStrain::computeValue()
   }
 
 
-  for (unsigned int l = 0; l < 24; l++) 
+  for (unsigned int l = 0; l < 24; l++)
   {
-    for (unsigned int i = 0; i < 3; i++) 
+    for (unsigned int i = 0; i < 3; i++)
     {
       n[l][i] = 0.0;
-      for (unsigned int j = 0; j < 3; j++) 
+      for (unsigned int j = 0; j < 3; j++)
       {
           n[l][i] = n[l][i] + R(i,j) * N0[l][j];
       }
@@ -195,25 +214,25 @@ Real LatticeStrain::computeValue()
 
   Real latticeStrain, cosangle;
   latticeStrain = 0.0e0;
-  
-  for (unsigned int l = 0; l < 24; l++) 
+
+  for (unsigned int l = 0; l < 24; l++)
   {
     if ((n[l][0]*n[l][0] + n[l][1]*n[l][1] + n[l][2]*n[l][2])>1e-15)
     {
       cosangle = ((n[l][0]*_g0 + n[l][1]*_g1 + n[l][2]*_g2) / sqrt(n[l][0]*n[l][0] + n[l][1]*n[l][1] + n[l][2]*n[l][2]) / sqrt(_g0*_g0 + _g1*_g1 + _g2*_g2));
 
-      if (abs(acos(cosangle)* 180.0/(22.0/7.0)) <= _tol) 
+      if (abs(acos(cosangle)* 180.0/(22.0/7.0)) <= _tol)
       {
-        for (unsigned int i = 0; i < 3; i++) 
+        for (unsigned int i = 0; i < 3; i++)
         {
-            for (unsigned int j = 0; j < 3; j++) 
+            for (unsigned int j = 0; j < 3; j++)
             {
               latticeStrain = latticeStrain + (n[l][i]*elE(i,j)*n[l][j]);
             }
         }
-        break;  
+        break;
       }
-    }    
+    }
   }
   return latticeStrain;
 

@@ -45,7 +45,7 @@ for running the example given in  `rhocp/examples/copper/strain_rate_effect/comp
 For the general &rho;-CP framework, refer to:
 - Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
 
-For calculation of lattice strains, refer to Appendix A in:
+For prediction of residual strains during post-solidification cooling (see: examples/304steel_cooling_residual_stress) and calculation of lattice strains, refer to:
 - Pokharel, R., Patra, A., Brown, D.W., Clausen, B., Vogel, S.C., Gray, G.T., “An analysis of phase stresses in additively manufactured 304L stainless steel using neutron diffraction measurements and crystal plasticity finite element simulations”, International Journal of Plasticity, Vol. 121, 2019, pp. 201-217.
 
 For the dislocation density-based J<sub>2</sub> plasticity model, refer to: 

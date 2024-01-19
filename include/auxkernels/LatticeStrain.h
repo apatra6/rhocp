@@ -26,5 +26,9 @@ protected:
 
   const MaterialProperty<std::vector<Real> > & _state_var;
   const MaterialProperty<Point> & _euler_ang;
+
+  // The eigenstrains
+  std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
 };
 #endif //LATTICESTRAIN_H

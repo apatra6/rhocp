@@ -39,6 +39,11 @@ protected:
 
   MaterialProperty<Point> & _euler_ang;
 
+  // The eigenstrains
+  std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
+
   MaterialProperty<std::vector<Real> > & _state_var;
   const MaterialProperty<std::vector<Real> > & _state_var_old;
   MaterialProperty<std::vector<Real> > & _properties;
