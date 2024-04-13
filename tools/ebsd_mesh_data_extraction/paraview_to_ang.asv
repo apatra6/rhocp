@@ -1,0 +1,23 @@
+clc; clear;
+%% MATLAB script to generate .ang file from MOOSE Exodus output
+
+% original input microstructure
+fname = 'example_2_file.ang';
+ebsd_data = importdata(fname,' ',218);
+inp_data = ebsd_data.data;
+
+% csv file exported from Paraview
+imp_data = importdata('point_to_cell_data.csv');
+data = imp_data.data;
+ori = [data(:,11)  data(:,5)  data(:,12)] * pi/180;
+phase_id = data(:,3);
+
+array = [ori ebsd.prop.y ebsd.prop.x ... 
+    ones(size(ebsd.prop.x)) ones(size(ebsd.prop.x)) phase_id ... 
+    ones(size(ebsd.prop.x)) ones(size(ebsd.prop.x))];
+
+
+[pathstr,name,ext] = fileparts(fname);
+outfile = fullfile(pathstr,['example_2_out',ext]);
+write_OIM_data(array,fname,outfile);
+
