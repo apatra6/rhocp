@@ -14,6 +14,8 @@ https://arxiv.org/abs/2303.02441
 
 Details of the material properties/model parameters and their input to the model are given in: <a href="rhoCP_model_parameters.pdf" target="_blank">Model Parameters</a>
 
+Details of pre- and post-processing are given in: <a href="rho-CP_Pre_and_Post_Processing.pdf" target="_blank">Pre- and Post-Processing</a>
+
 ![Screenshot](rhoCP_graphic.png)
 
 ## Installation
