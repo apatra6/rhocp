@@ -18,6 +18,8 @@ Details of pre- and post-processing are given in: <a href="rho-CP_Pre_and_Post_P
 
 ![Screenshot](rhoCP_graphic.png)
 
+All input files tested with MOOSE version: 024e31760a (2024-08-13), PETSc version: 3.21.4, SLEPc version: 3.21.1
+
 ## Installation
 The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_started/installation/index.html), then clone and compile &rho;-CP alongside MOOSE in the `projects` directory:
 - Following installation of MOOSE and the required `conda` environment, the source files can be obtained either using the following commands from the `home` directory:   

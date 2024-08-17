@@ -1,5 +1,8 @@
-[Mesh]
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[Mesh]
   construct_side_list_from_node_list = true
   # parallel_type = distributed
   [./fmg]
@@ -154,11 +157,12 @@
 
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-    displacements = 'disp_x disp_y disp_z'
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    strain = FINITE
+    incremental = true
     use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
@@ -417,12 +421,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-    block = 'ANY_BLOCK_ID 0'
-  [../]
   [./elasticity_tensor]
     type = ComputeCPElasticityTensor
     block = 'ANY_BLOCK_ID 0'
@@ -622,14 +620,14 @@
   csv = true
   print_linear_residuals = true
   perf_graph = true
-  interval = 10
-   [out]
-       type = Checkpoint
-       num_files = 5
-       interval = 500
-   []
+  time_step_interval = 10
+  [out]
+    type = Checkpoint
+    num_files = 2
+    time_step_interval = 500
+  []
   [./exodus]
     type = Exodus
-    interval = 500
+    time_step_interval = 500
   [../]
 []

@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -10,7 +14,6 @@
   nx = 1
   ny = 1
   nz = 1
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -74,11 +77,12 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
@@ -207,17 +211,12 @@
 []
 
 [UserObjects]
-  [./grain_size]
+  [./grain_size] # Note: this does not work with restart, comment if restarting
     type = GrainAreaSize
   [../]
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./J2StressUpdate]
     type = DDJ2StressUpdate
     propsFile = j2_props.in
@@ -318,10 +317,10 @@
   file_base = out_1micron
   csv = true
   print_linear_residuals = true
-  print_perf_log = true
-  interval = 10
+  perf_graph = true
+  time_step_interval = 10
   [./exodus]
     type = Exodus
-    interval = 10
+    time_step_interval = 10
   [../]
 []

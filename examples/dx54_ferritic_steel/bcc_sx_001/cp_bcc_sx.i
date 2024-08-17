@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -8,10 +12,9 @@
   zmin = 0.0
   zmax = 0.1
   # change the number of elements as desired
-  nx = 6
-  ny = 6
-  nz = 6
-  displacements = 'disp_x disp_y disp_z'
+  nx = 2
+  ny = 2
+  nz = 2
 []
 
 [Variables]
@@ -87,11 +90,12 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
@@ -246,11 +250,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./CPStressUpdate]
     type = DDCPTSTStressUpdate
     propsFile = bcc_props.in
@@ -372,10 +371,15 @@
   file_base = out_bcc
   csv = true
   print_linear_residuals = true
-  print_perf_log = true
-  interval = 10
+  perf_graph = true
+  time_step_interval = 10
   [./exodus]
     type = Exodus
-    interval = 10
+    time_step_interval = 10
+  [../]
+  [./out]
+    type = Checkpoint
+    num_files = 3
+    time_step_interval = 10
   [../]
 []

@@ -1,24 +1,19 @@
-[Mesh]
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  [./gmg]
-    type = GeneratedMeshGenerator
-    dim = 3
-    xmin = 0.0
-    xmax = 1.0
-    ymin = 0.0
-    ymax = 1.0
-    zmin = 0.0
-    zmax = 1.0
-    nx = 2
-    ny = 2
-    nz = 2
-  [../]
-  [./bot_corner]
-    type = ExtraNodesetGenerator
-    new_boundary = bot_corner
-    input = gmg
-    coord = '0.0 0 0.0'
-  [../]
+[]
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  xmin = 0.0
+  xmax = 1
+  ymin = 0.0
+  ymax = 1
+  zmin = 0.0
+  zmax = 1
+  nx = 1
+  ny = 1
+  nz = 1
 []
 
 [Variables]
@@ -40,27 +35,27 @@
 []
 
 [AuxVariables]
-  [./total_strain_xx]
+  [./strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./total_strain_yy]
+  [./strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./total_strain_zz]
+  [./strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./total_strain_xy]
+  [./strain_xy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./total_strain_yz]
+  [./strain_yz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./total_strain_zx]
+  [./strain_zx]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -160,59 +155,59 @@
 
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
-    # use_finite_deform_jacobian = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 [AuxKernels]
-  [./total_strain_zz]
+  [./strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = total_strain_zz
+    variable = strain_zz
     execute_on = timestep_end
     index_i = 2
     index_j = 2
   [../]
-  [./total_strain_yy]
+  [./strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = total_strain_yy
+    variable = strain_yy
     execute_on = timestep_end
     index_i = 1
     index_j = 1
   [../]
-  [./total_strain_xx]
+  [./strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = total_strain_xx
+    variable = strain_xx
     execute_on = timestep_end
     index_i = 0
     index_j = 0
   [../]
-  [./total_strain_xy]
+  [./strain_xy]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = total_strain_xy
+    variable = strain_xy
     execute_on = timestep_end
     index_i = 0
     index_j = 1
   [../]
-  [./total_strain_yz]
+  [./strain_yz]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = total_strain_yz
+    variable = strain_yz
     execute_on = timestep_end
     index_i = 1
     index_j = 2
   [../]
-  [./total_strain_zx]
+  [./strain_zx]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = total_strain_zx
+    variable = strain_zx
     execute_on = timestep_end
     index_i = 0
     index_j = 2
@@ -366,7 +361,7 @@
     file_name = orientations_SX.in
     execute_on = 'initial'
   [../]
-  [./grain_size]
+  [./grain_size] # Note: this does not work with restart, comment if restarting
     type = GrainAreaSize
   [../]
 []
@@ -424,12 +419,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-    block = 'ANY_BLOCK_ID 0'
-  [../]
   [./elasticity_tensor]
     type = ComputeCPElasticityTensor
     block = 'ANY_BLOCK_ID 0'
@@ -499,27 +488,27 @@
 [Postprocessors]
   [./strain_zz]
     type = ElementAverageValue
-    variable = total_strain_zz
+    variable = strain_zz
   [../]
   [./strain_yy]
     type = ElementAverageValue
-    variable = total_strain_yy
+    variable = strain_yy
   [../]
   [./strain_xx]
     type = ElementAverageValue
-    variable = total_strain_xx
+    variable = strain_xx
   [../]
   [./strain_xy]
     type = ElementAverageValue
-    variable = total_strain_xy
+    variable = strain_xy
   [../]
   [./strain_yz]
     type = ElementAverageValue
-    variable = total_strain_yz
+    variable = strain_yz
   [../]
   [./strain_zx]
     type = ElementAverageValue
-    variable = total_strain_zx
+    variable = strain_zx
   [../]
   [./vonmises]
     type = ElementAverageValue
@@ -616,14 +605,14 @@
   csv = true
   print_linear_residuals = true
   perf_graph = true
-  interval = 10
+  time_step_interval = 10
   # [out]
   #     type = Checkpoint
   #     num_files = 2
-  #     interval = 50
+  #     time_step_interval = 50
   # []
   [./exodus]
     type = Exodus
-    interval = 100
+    time_step_interval = 10
   [../]
 []

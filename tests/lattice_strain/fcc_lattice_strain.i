@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -7,10 +11,9 @@
   ymax = 1.0
   zmin = 0.0
   zmax = 1.0
-  nx = 5
-  ny = 5
-  nz = 5
-  displacements = 'disp_x disp_y disp_z'
+  nx = 8
+  ny = 8
+  nz = 8
 []
 
 [Variables]
@@ -148,11 +151,12 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
@@ -420,12 +424,12 @@
 [UserObjects]
   [./euler_angle]
     type = EulerAngleReader
-    file_name = orientations1.in # orientations1 = 001, orientations2 = 110, orientations3 = 111
+    file_name = orientations2.in # orientations1 = 001, orientations2 = 110, orientations3 = 111
     execute_on = 'initial'
   [../]
-  [./grain_size]
-    type = GrainAreaSize
-  [../]
+  # [./grain_size] # Note: this does not work with restart, comment if restarting
+  #   type = GrainAreaSize
+  # [../]
 []
 
 [Functions]
@@ -437,7 +441,7 @@
   [./dts]
     type = PiecewiseLinear
     x = '0 0.2'
-    y = '0.0005 0.1'
+    y = '0.0005 0.01'
   [../]
 []
 
@@ -477,11 +481,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./CPStressUpdate]
     type = DDCPStressUpdate
     propsFile = fcc_props.in
@@ -492,7 +491,7 @@
     temp = 300 # K
     tol = 5e-7
     EulerAngFileReader = euler_angle
-    GrainAreaSize = grain_size
+    # GrainAreaSize = grain_size
   [../]
   [./elasticity_tensor]
     type = ComputeCPElasticityTensor
@@ -647,10 +646,15 @@
   file_base = out_lattice_strain
   csv = true
   print_linear_residuals = true
-  print_perf_log = true
-  interval = 10
+  perf_graph = true
+  time_step_interval = 10
   [./exodus]
     type = Exodus
-    interval = 10
+    time_step_interval = 10
+  [../]
+  [./out]
+    type = Checkpoint
+    num_files = 3
+    time_step_interval = 10
   [../]
 []

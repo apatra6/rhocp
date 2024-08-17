@@ -1,5 +1,8 @@
-[Mesh]
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[Mesh]
   construct_side_list_from_node_list = true
   # parallel_type = distributed
   [./fmg]
@@ -136,11 +139,12 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
@@ -310,7 +314,7 @@
 [Functions]
   [./top_pull]
     type = ParsedFunction
-    value = '0.8*0.0005'
+    expression = '0.8*0.0005'
   [../]
 
   [./dts]
@@ -356,11 +360,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./CPStressUpdate]
     type = DDCPTSTStressUpdate
     propsFile = bcc_props.in
@@ -520,14 +519,14 @@
   csv = true
   print_linear_residuals = true
   perf_graph = true
-  interval = 20
+  time_step_interval = 20
    [out]
        type = Checkpoint
        num_files = 3
-       interval = 200
+       time_step_interval = 200
    []
   [./exodus]
     type = Exodus
-    interval = 200
+    time_step_interval = 200
   [../]
 []

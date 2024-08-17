@@ -1,5 +1,8 @@
-[Mesh]
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[Mesh]
   construct_side_list_from_node_list = false
   [./fmg]
     type = FileMeshGenerator
@@ -147,11 +150,12 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
@@ -404,11 +408,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./CPStressUpdate]
     type = DDCPStressUpdate
     propsFile = fcc_props.in
@@ -574,14 +573,14 @@
   csv = true
   print_linear_residuals = true
   perf_graph = true
-  interval = 10
+  time_step_interval = 10
   [./exodus]
    type = Exodus
-   interval = 100
+   time_step_interval = 100
   [../]
   [./cp]
     type = Checkpoint
-    interval = 100
+    time_step_interval = 100
     num_files = 2
   [../]
 []

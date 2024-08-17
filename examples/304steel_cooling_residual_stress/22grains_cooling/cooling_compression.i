@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
  construct_side_list_from_node_list=true
  [./fmg]
@@ -170,12 +174,26 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./alpha]
     strain = FINITE
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
+    decomposition_method = EigenSolution
     save_in = 'resid_x resid_y resid_z'
+    block = 10
+    eigenstrain_names = alpha_thermal
+  [../]
+  [./gamma]
+    strain = FINITE
+    incremental = true
+    use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
+    decomposition_method = EigenSolution
+    save_in = 'resid_x resid_y resid_z'
+    block = '1 2 3 4 5 6 7 8 9 11 12 13 14 15 16 17 18 19 20 21 22'
+    eigenstrain_names = gamma_thermal
   [../]
 []
 
@@ -554,22 +572,6 @@
 []
 
 [Materials]
-  [./alpha_strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    decomposition_method = EigenSolution
-    displacements = 'disp_x disp_y disp_z'
-    block = 10
-    eigenstrain_names = alpha_thermal
-  [../]
-  [./gamma_strain]
-    type = ComputeFiniteStrain
-    volumetric_locking_correction = false
-    decomposition_method = EigenSolution
-    displacements = 'disp_x disp_y disp_z'
-    block = '1 2 3 4 5 6 7 8 9 11 12 13 14 15 16 17 18 19 20 21 22'
-    eigenstrain_names = gamma_thermal
-  [../]
   [./elasticity_tensor]
     type = ComputeCPElasticityTensor
     block = 'ANY_BLOCK_ID 0'
@@ -915,9 +917,9 @@
   csv = true
   print_linear_residuals = true
   perf_graph = true
-  interval = 10
+  time_step_interval = 10
   [./exodus]
    type = Exodus
-   interval = 100
+   time_step_interval = 100
   [../]
 []
