@@ -40,7 +40,7 @@ ElementNormalizedValue::getValue() const
 {
   Real vol;
   if (_volume == 0.e0) {
-    vol = 1.e6;
+    vol = 1.e0;
   }
   else {
     vol = _volume;

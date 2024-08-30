@@ -11,9 +11,9 @@
   ymax = 1.0
   zmin = 0.0
   zmax = 1.0
-  nx = 8
-  ny = 8
-  nz = 8
+  nx = 5
+  ny = 5
+  nz = 5
 []
 
 [Variables]
