@@ -57,12 +57,11 @@ protected:
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
   const MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankFourTensor> & _Cel_cp;
-  MaterialProperty<RankTwoTensor> & _De_mat;
 
   // added for residual strain evolution
-//  std::string _eigenstrain_name;
-//  const MaterialProperty<RankTwoTensor> & _eigenstrain;
-//  const MaterialProperty<RankTwoTensor> & _eigenstrain_old;
+  std::string _eigenstrain_name;
+  const MaterialProperty<RankTwoTensor> & _eigenstrain;
+  const MaterialProperty<RankTwoTensor> & _eigenstrain_old;
 
   // parameters/variables used for calculations
   static const int max_loops = 20;
@@ -80,14 +79,14 @@ protected:
   Real power(Real x, Real y);
   Real sgn(Real x);
 
-  void NR_residual (unsigned int num_slip_sys, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gamma_dot, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &bstress0, std::vector<Real> &bstress, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse, Real k_rho_vec[12]);
+  void NR_residual (unsigned int num_slip_sys, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gamma_dot, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv0, Real C[3][3][3][3], std::vector<Real> &rho_SSD0, std::vector<Real> &rho_SSD, std::vector<Real> &bstress0, std::vector<Real> &bstress, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse);
 
   Real tolerance;
 
   Real act_vol;
   Real delF0;
 
-  Real C11, C11_perK, C12, C12_perK, C44, C44_perK, G, G_perK, b_mag, gammadot0g, enthalpy_const, p, q, p0, tau0, hp_coeff, grain_size, frictional_stress, k_rho, k_I, Alatent, rho_m_zero, k_M, R_c, k_ann, k_D, k_bs1, k_bs2, B_k, freq;
+  Real C11, C11_perK, C12, C12_perK, C44, C44_perK, G, G_perK, b_mag, gammadot0g, enthalpy_const, p, q, p0, tau0, hp_coeff, grain_size, frictional_stress, k_rho, k_I, Alatent, rho_SSD_zero, k_M, R_c, k_ann, k_D, k_bs1, k_bs2, B_k, freq;
 
   Real sse;
 };

@@ -30,8 +30,7 @@ DDCP_SSD_StressUpdate::validParams()
   params.addParam<int>("isEulerBunge", 0, "Are Euler angles specified in Bunge notation");
 
   // introduce RS in the material
-//  params.addRequiredParam<std::string>("eigenstrain_name", "Material property name for the eigenstrain tensor computed by this model. IMPORTANT: The name of this property must also be provided to the strain calculator.");
-
+  params.addRequiredParam<std::string>("eigenstrain_name", "Material property name for the eigenstrain tensor computed by this model. IMPORTANT: The name of this property must also be provided to the strain calculator.");
   return params;
 }
 
@@ -71,13 +70,10 @@ DDCP_SSD_StressUpdate::DDCP_SSD_StressUpdate(const InputParameters & parameters)
     _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _Cel_cp(declareProperty<RankFourTensor>("Cel_cp")),
-    _De_mat(declareProperty<RankTwoTensor>("De_mat"))
-
     // introduce RS in the material
-//    _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
-//    _eigenstrain(getMaterialPropertyByName<RankTwoTensor>(_eigenstrain_name)),
-//    _eigenstrain_old(getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_name))
-
+    _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
+    _eigenstrain(getMaterialPropertyByName<RankTwoTensor>(_eigenstrain_name)),
+    _eigenstrain_old(getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_name))
 {
   // Constructor
 }
@@ -120,16 +116,13 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   Real E_eff;
   Real E_p_eff;
   Real E_p_eff_cum;
-  Real rho_m_avg0, rho_m_avg;
+  Real rho_SSD_avg0, rho_SSD_avg;
 
   Real dir_cos[3][3]; // Rotation matrix
   Real dir_cos0[3][3]; // Rotation matrix at the beginning of simulation
   Real C0[3][3][3][3]; // Elastic stiffness tensor
   Real C[3][3][3][3];
   Real C_avg[3][3][3][3];
-  Real k_rho_vec[12]; //temporary addition for increasing lattice strains
-  Real slip_const; // ID of slip system which has max schmid factor
-  Real max_schmid_val; //For reading only
 
   RankTwoTensor sig_avg;
   RankTwoTensor sig;
@@ -145,8 +138,8 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   std::vector<std::vector<Real>> xm0(3, std::vector<Real>(_num_slip_sys)); // intermediate config plane normals in global coords
   std::vector<std::vector<Real>> xm(3, std::vector<Real>(_num_slip_sys)); // current config plane normals in global coords
 
-  std::vector<Real> rho_m0(_num_slip_sys); // SSD density at beginning of step
-  std::vector<Real> rho_m(_num_slip_sys); // SSD density at end of step
+  std::vector<Real> rho_SSD0(_num_slip_sys); // SSD density at beginning of step
+  std::vector<Real> rho_SSD(_num_slip_sys); // SSD density at end of step
 
   std::vector<Real> bstress0(_num_slip_sys); // backstress at beginning of step
   std::vector<Real> dbstress(_num_slip_sys); // backstress change
@@ -314,10 +307,10 @@ void DDCP_SSD_StressUpdate::computeQpStress()
     E_p_eff_cum = 0;
 
     // Initialize average values of defect densities and the corresponding loop sizes
-    rho_m_avg0 = rho_m_zero;
+    rho_SSD_avg0 = rho_SSD_zero;
 
     for (unsigned int n = 0; n<_num_slip_sys; n++){
-      rho_m0[n] = rho_m_zero;
+      rho_SSD0[n] = rho_SSD_zero;
     }
 
     // AF model for backstress
@@ -381,32 +374,23 @@ void DDCP_SSD_StressUpdate::computeQpStress()
 
     // Read average values of defect densities and loop sizes SDV 48
     n = n + 1;
-    rho_m_avg0 = _state_var[_qp][n];
+    rho_SSD_avg0 = _state_var[_qp][n];
 
     // Read average dislocation glide rates  SDV 49
     n = n + 1;
     // gamma_dot_g_avg0 = _state_var[_qp][n];
 
-    // Read SSD density values SDV 49 + _num_slip_sys = 50-61
+    // Read SSD density values SDV 49 + _num_slip_sys
     for (unsigned int i = 0; i < _num_slip_sys; i++) {
       n = n + 1;
-      rho_m0[i] = _state_var[_qp][n];
+      rho_SSD0[i] = _state_var[_qp][n];
     }
 
-    // Read back stress values SDV 50 + _num_slip_sys*2= 62-73
+    // Read back stress values SDV 50 + _num_slip_sys*2
     for (unsigned int i = 0; i < _num_slip_sys; i++) {
       n = n + 1;
       bstress0[i] = _state_var[_qp][n];
     }
-
-    n = 79;
-    max_schmid_val = _state_var[_qp][n];
-    n += 1;
-    slip_const = _state_var[_qp][n];
-    //std::cout<<max_schmid_val<<"\t"<<slip_const<<"\n";
-
-    n = 100;
-    latticeStrain_old = _state_var[_qp][n];
 
     // std::cout << "\nTotal no. of state vars read:" << n;
   } // End of initializations
@@ -482,7 +466,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   bool converged, improved;
 
   // account for eigen strains  
-/*  RankTwoTensor Ftheta, Ftheta_old;
+  RankTwoTensor Ftheta, Ftheta_old;
   Ftheta.zero();
   Ftheta_old.zero();
   for (int i=0; i<3; ++i)
@@ -492,11 +476,11 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   }
 
   RankTwoTensor prevF = _deformation_gradient_old[_qp] * Ftheta_old.inverse(); //Old deformation gradient
-  RankTwoTensor newF = _deformation_gradient[_qp] * Ftheta.inverse(); //Deformation gradient */
+  RankTwoTensor newF = _deformation_gradient[_qp] * Ftheta.inverse(); //Deformation gradient
 
   // Initialize deformation gradients for beginning and end of subincrement.
-  dfgrd0 = _deformation_gradient_old[_qp];
-  dfgrd1 = _deformation_gradient[_qp];
+  dfgrd0 = prevF;
+  dfgrd1 = newF;
   F0 = dfgrd0;
   F1 = dfgrd1;
 
@@ -515,7 +499,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
 
   // Initialize mobile dislocation density
   for (unsigned int n = 0; n < _num_slip_sys; n++) {
-    rho_m[n] = rho_m0[n];
+    rho_SSD[n] = rho_SSD0[n];
   }
   
   // Initialize backstress
@@ -524,7 +508,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   }
 
   // Initialize average defect densities and loop sizes
-  rho_m_avg = rho_m_avg0;
+  rho_SSD_avg = rho_SSD_avg0;
 
   // Multiply F() by F_p_inv() to get F_el()
   F_el = F0 * F_p_inv_0;
@@ -593,15 +577,11 @@ void DDCP_SSD_StressUpdate::computeQpStress()
     tau_eff[k] = tau[k] - bstress[k];
   }
 
-  for (unsigned int ia=0;ia<_num_slip_sys;ia++) {
-      k_rho_vec[ia] = k_rho;
-  }
-
   // Calculate athermal slip resistance for each slip system.
   for (unsigned int ia = 0; ia < _num_slip_sys; ia++) {
     Real sum1 = 0.0;
     for (unsigned int ib = 0; ib < _num_slip_sys; ib++) {
-      sum1 = sum1 + p0 * A[ia][ib] * rho_m[ib];
+      sum1 = sum1 + p0 * A[ia][ib] * rho_SSD[ib];
     }
     s_a[ia] = tau0 + hp_coeff/sqrt(grain_size) + k_rho * G * b_mag * sqrt(sum1);
   }
@@ -655,7 +635,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
     iNR = iNR + 1;
     // converged = true;
 
-    NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_dot, F1, F_p_inv, F_p_inv_0, C, rho_m0, rho_m, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse, k_rho_vec);
+    NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_dot, F1, F_p_inv, F_p_inv_0, C, rho_SSD0, rho_SSD, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse);
 
     sse_ref = sse;
 
@@ -666,7 +646,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
 
     // Begin calculation of the partial derivatives needed for the Newton-Raphson step
 
-    // Calculate derivative of the mobile dislocation density, rho_m, immobile dislocation density, backstress, bstress, w.r.t. gamma-dot-beta
+    // Calculate derivative of the mobile dislocation density, rho_SSD, immobile dislocation density, backstress, bstress, w.r.t. gamma-dot-beta
     std::vector<std::vector<Real>> temp1(_num_slip_sys, std::vector<Real>(_num_slip_sys));
     std::vector<std::vector<Real>> temp2(_num_slip_sys, std::vector<Real>(_num_slip_sys));
     std::vector<std::vector<Real>> drhomdgb(_num_slip_sys, std::vector<Real>(_num_slip_sys));
@@ -692,7 +672,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
     // SSD density 
     for (unsigned int ia = 0; ia < _num_slip_sys; ia++) {
       for (unsigned int ja = 0; ja < _num_slip_sys; ja++) {
-        drhomdgb[ia][ja] = dt_incr * ( (k_M/b_mag * sqrt(rho_m[ia]) * k_delta[ia][ja] * sgn(gamma_dot[ia])) - (k_I * rho_m[ia] * k_delta[ia][ja] * sgn(gamma_dot[ia]))) / (1 - (k_M * abs(gamma_dot[ia]) * dt_incr/2/b_mag/sqrt(rho_m[ia])) + (k_I * abs(gamma_dot[ia]) * dt_incr));
+        drhomdgb[ia][ja] = dt_incr * ( (k_M/b_mag * sqrt(rho_SSD[ia]) * k_delta[ia][ja] * sgn(gamma_dot[ia])) - (k_I * rho_SSD[ia] * k_delta[ia][ja] * sgn(gamma_dot[ia]))) / (1 - (k_M * abs(gamma_dot[ia]) * dt_incr/2/b_mag/sqrt(rho_SSD[ia])) + (k_I * abs(gamma_dot[ia]) * dt_incr));
       }
     }
 
@@ -711,10 +691,10 @@ void DDCP_SSD_StressUpdate::computeQpStress()
     // backstress
     for(unsigned int ia = 0; ia < _num_slip_sys; ia++) {
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
-        dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1 * (0.5*(k_rho*G*b_mag)/sqrt(rho_m[ia])) * dt_incr * (drhomdgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
+        dbsdgb[ia][ib] = dbsdgb[ia][ib] + k_bs1 * (0.5*(k_rho*G*b_mag)/sqrt(rho_SSD[ia])) * dt_incr * (drhomdgb[ia][ib])*sgn(tau[ia] -bstress[ia])*abs(gamma_dot[ia]);
       }
 
-      dbsdgb[ia][ia] = dbsdgb[ia][ia] + k_bs1*k_rho*G*b_mag*dt_incr*sqrt(rho_m[ia])*sgn(tau[ia] - bstress[ia])*sgn(gamma_dot[ia]) - k_bs2*dt_incr*  bstress[ia]*sgn(gamma_dot[ia]);
+      dbsdgb[ia][ia] = dbsdgb[ia][ia] + k_bs1*k_rho*G*b_mag*dt_incr*sqrt(rho_SSD[ia])*sgn(tau[ia] - bstress[ia])*sgn(gamma_dot[ia]) - k_bs2*dt_incr*  bstress[ia]*sgn(gamma_dot[ia]);
     }
 
     for(unsigned int ia = 0; ia < _num_slip_sys; ia++) {
@@ -737,7 +717,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
       for(unsigned int ib = 0; ib < _num_slip_sys; ib++) {
         sum1 = 0.0; sum2 = 0.0;
         for(unsigned int ic = 0; ic < _num_slip_sys; ic++) {
-            sum1 = sum1 + p0 * A[ia][ic] * rho_m[ic];
+            sum1 = sum1 + p0 * A[ia][ic] * rho_SSD[ic];
             sum2 = sum2 + p0 * A[ia][ic] * drhomdgb[ic][ib];
         }
         dsadgb[ia][ib] = 0.5 * k_rho * G * b_mag * sum2/sqrt(sum1);
@@ -816,7 +796,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
         gamma_try[k] = gamma_try_g[k];
       }
 
-      NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_try, F1, F_p_inv, F_p_inv_0, C, rho_m0, rho_m, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse, k_rho_vec);
+      NR_residual (_num_slip_sys, xs0, xm0, _temp[_qp], dt_incr, gamma_try, F1, F_p_inv, F_p_inv_0, C, rho_SSD0, rho_SSD, bstress0, bstress, sig, tau, tau_eff, s_a, s_t, A, H, residual, sse);
 
       if ((sse_old <= sse_ref) && (sse >= sse_old) && (N_ctr > 0)) {
         improved = true;
@@ -885,7 +865,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
     }
 
     for (unsigned int k = 0; k < _num_slip_sys; k++) {
-      rho_m0[k] = rho_m[k];
+      rho_SSD0[k] = rho_SSD[k];
       bstress0[k] = bstress[k];
     }
   }
@@ -1177,49 +1157,27 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   _state_var[_qp][n] = E_p_eff;
 
   // Store average values of defect densities and loop sizes SDV 48
-  rho_m_avg = 0.0;
+  rho_SSD_avg = 0.0;
 
   Real gamma_dot_avg = 0.0;
   for (unsigned int i = 0; i < _num_slip_sys; i++) {
-    rho_m_avg = rho_m_avg + rho_m[i];
+    rho_SSD_avg = rho_SSD_avg + rho_SSD[i];
     gamma_dot_avg = gamma_dot_avg + gamma_dot[i];
   }
 
-  rho_m_avg = rho_m_avg/_num_slip_sys;
+  rho_SSD_avg = rho_SSD_avg/_num_slip_sys;
   gamma_dot_avg = gamma_dot_avg/_num_slip_sys;
 
   //SDV 48
   n = n + 1;
-  _state_var[_qp][n] = rho_m_avg;
+  _state_var[_qp][n] = rho_SSD_avg;
 
-  // Store average dislocation glide rates SDV 49
-  n = n + 1;
-  _state_var[_qp][n] = gamma_dot_avg;
+//   // Store average dislocation glide rates SDV 49
+//   n = n + 1;
+//   _state_var[_qp][n] = gamma_dot_avg;
 
-  // Store SSD density values SDV 49 + _num_slip_sys = 50-61
-  for (unsigned int i = 0; i < _num_slip_sys; i++) {
-    n = n + 1;
-    _state_var[_qp][n] = rho_m[i];
-  }
-
-  // Store backstress values SDV 49 + _num_slip_sys*2 = 62-73
-  for (unsigned int i = 0; i < _num_slip_sys; i++) {
-    n = n + 1;
-    _state_var[_qp][n] = gamma_dot_g[i];
-  }
-
-  //SSD (74) and Backstress (75) calculation
-  Real eff_bs = 0.0; Real total_ssd = 0.0;
-  for (unsigned int ia = 0; ia < _num_slip_sys; ia++) {
-    total_ssd += rho_m[ia];
-  }
-  
-  //SDV 74
-  n += 1;
-  _state_var[_qp][n] = total_ssd;
-
-  //SDV 75
-  Real bstress_mean[3][3];  
+  //SDV 49
+  Real bstress_mean[3][3], eff_bs;
   for (unsigned int ia = 0; ia < 3; ia++) {
     for (unsigned int ja = 0; ja < 3; ja++) {
       bstress_mean[ia][ja] = 0.0;
@@ -1230,314 +1188,20 @@ void DDCP_SSD_StressUpdate::computeQpStress()
   }
   eff_bs = aa_dot_dot_bb(bstress_mean,bstress_mean);
   n += 1;
-  _state_var[_qp][n] = sqrt((3/2) * eff_bs);  
+  _state_var[_qp][n] = sqrt((3/2) * eff_bs);
 
-  //Triaxiality ratio 
-  //SDV 76
-  Real sigma_mean, sigma_dd, sigma_eff;
-  Real sig_matrix[3][3];
-  sigma_mean = (sig(1,1) + sig(2,2) + sig(3,3))/3;
-  for(unsigned int ia = 0;ia<3;ia++){
-    for(unsigned int ja = 0;ja<3;ja++){
-      sig_matrix[ia][ja] = sig(ia,ja);
-    }
-  }
-  sigma_dd = aa_dot_dot_bb(sig_matrix,sig_matrix);
-  sigma_eff = sqrt((3/2) * sigma_dd); 
-  n += 1;
-  _state_var[_qp][n] = sigma_mean/sigma_eff;
-
-  //Plastic strain accumulation
-  //SDV 77    // SDV 45
-  Real spatial_vel_grad[3][3], psa_var;
-  for (unsigned int i = 0; i < 3; i++) {
-    for (unsigned int j = 0; j < 3; j++) {
-      spatial_vel_grad[i][j] = 0.0;
-      for (unsigned int k = 0; k < _num_slip_sys; k++) {
-        spatial_vel_grad[i][j] = spatial_vel_grad[i][j] + xs0[i][k]*xm0[j][k]*gamma_dot[k];
-      }
-    }
-  }
-  psa_var = aa_dot_dot_bb(spatial_vel_grad,spatial_vel_grad);
-  n += 1;
-  _state_var[_qp][n] = sqrt((2/3) * psa_var) * _dt;
-
-  //Plastic work method 1
-  //SDV 78
-  Real pls_work;
-  pls_work = aa_dot_dot_bb(sig_matrix,spatial_vel_grad);
-  n += 1;
-  _state_var[_qp][n] = pls_work * _dt;
-
-  //Plastic work method 2
-  //SDV 79
-  Real tot_work;
-  for (unsigned int k = 0; k < _num_slip_sys; k++) {
-   tau[k] = 0.0;
-   for (unsigned int j = 0; j < 3; j++) {
-     for (unsigned int i = 0; i < 3; i++) {
-        tau[k] = tau[k] + xs[i][k]*xm[j][k]*sig(i,j);
-      }
-    }
-  }
-  tot_work = 0.0;
-  for(unsigned int ia=0; ia<_num_slip_sys; ia++) {
-    tot_work = tot_work + abs(tau[ia] * gamma_dot[ia]);
-  }
-  n += 1;
-  _state_var[_qp][n] = tot_work * _dt;
-
-  //schmid_factor
-  //SDV 80
-  Real unit_sigma[3][3],schmid_max;
-
-  if (_t_step <= 100) {
-    for (unsigned int ia = 0; ia < 3; ia++) {
-      for (unsigned int ja = 0; ja < 3; ja++) {
-        unit_sigma[ia][ja] = 0.0;
-      }
-    }
-    unit_sigma[2][2] = 1.0;
-
-    for (unsigned int k = 0; k < _num_slip_sys; k++) {
-    tau[k] = 0.0;
-    for (unsigned int j = 0; j < 3; j++) {
-      for (unsigned int i = 0; i < 3; i++) {
-          tau[k] = tau[k] + xs[i][k] * xm[j][k] * unit_sigma[i][j];
-        }
-      }
-    }
-    schmid_max = abs(tau[0]);
-    int const_id = 0;
-    for(unsigned int ia=0; ia<_num_slip_sys; ia++){
-      if(schmid_max<abs(tau[ia])){ 
-        schmid_max = abs(tau[ia]);
-        const_id = ia;
-      }
-    }
-    // SDV 80
-    n += 1;
-    _state_var[_qp][n] = schmid_max;
-    // SDV 81
-    n += 1;
-    _state_var[_qp][n] = const_id;
-  }
-  else n+=2;
-
-  //Fatemie Socie parameter
-  //SDV 82
-  //stress normal to slip plane
-  Real sig_norm[12], sig_norm_max, gamma_dot_max, sigma_y;
-  for (unsigned int k = 0; k < _num_slip_sys; k++) {
-   sig_norm[k] = 0.0;
-   for (unsigned int j = 0; j < 3; j++) {
-     for (unsigned int i = 0; i < 3; i++) {
-        sig_norm[k] = sig_norm[k] + xm[i][k] * xm[j][k] * sig(i,j);
-      }
-    }
-  }
-  //maximum values
-  sig_norm_max = abs(sig_norm[0]);
-  gamma_dot_max = abs(gamma_dot[0]);
-  for(unsigned int ia=0; ia<_num_slip_sys; ia++){
-    //max normal stress
-    if(sig_norm_max<abs(sig_norm[ia])) sig_norm_max = abs(sig_norm[ia]);
-    //max gamma_dot
-    if(gamma_dot_max<abs(gamma_dot[ia])) gamma_dot_max = abs(gamma_dot[ia]);
-  }
-  sigma_y = 251.0;
-  n += 1;
-  _state_var[_qp][n] = (gamma_dot_max * _dt) * (1 + 0.5 * sig_norm_max/sigma_y);
-
-  // Elastic strain 83-91
-  E_el = F_el.transpose() * F_el;
-  E_el(0,0) = E_el(0,0) - 1.0;
-  E_el(1,1) = E_el(1,1) - 1.0;
-  E_el(2,2) = E_el(2,2) - 1.0;
-  E_el = 0.5 * E_el;
-
-  for (unsigned int ia=0;ia<3;ia++) {
-    for (unsigned int ja=0;ja<3;ja++) {
-      n += 1;
-      _state_var[_qp][n] = E_el(ia,ja); 
-    }
-  }
-
-  // L calculation
-  RankTwoTensor L_total, F_dot_total, L_e, L_p, F_e_dot, E_e_dot;
-
-  F_dot_total = (F1 - F0) / _dt;
-  L_total = F_dot_total * F1.inverse();
-
-  //cout<<F_dot_total(0,0)<<"\n";
-  // Lp calculation
-  for (unsigned int i = 0; i < 3; i++) {
-    for (unsigned int j = 0; j < 3; j++) {
-      L_p(i,j) = 0.0;
-      for (unsigned int k = 0; k < _num_slip_sys; k++) {
-        L_p(i,j) = L_p(i,j) + xs[i][k]*xm[j][k]*gamma_dot[k];
-      }
-    }
-  }
-  
-  // L_e calculation
-  L_e  = L_total - L_p;
-
-  //F_e_dot = L_e * F_el;
-  // F_e_dot = (F_el - F_el_prev) / _dt;
-  //L_e = F_e_dot * F_el.inverse(); 
-  F_e_dot = F1 * F_p_inv;
-
-  E_e_dot = F_e_dot.transpose() * F_e_dot;
-  for(unsigned int ia=0;ia<3;ia++) {
-    E_e_dot(ia,ia) = E_e_dot(ia,ia) - 1.0;
-  }
-
-  //D_e calculation //92-100
-  for (unsigned int ia=0;ia<3;ia++) {
-    for (unsigned int ja=0;ja<3;ja++) {
-      n += 1;
-      _state_var[_qp][n] = 0.5 * (L_e(ia,ja) + L_e(ja,ia));
-      _De_mat[_qp](ia,ja) = 0.5 * (L_e(ia,ja) + L_e(ja,ia));
-    }
-  }
-
-  //Lattice strain estimation
-
-  RankTwoTensor R0_lattice, R_lattice, elR_lattice, elF_lattice, elE_lattice, Fp_lattice;
-
-  for (unsigned int ia=0;ia<3;ia++) {
-    for (unsigned int ja=0;ja<3;ja++) {
-      R0_lattice(ia,ja) = dir_cos0[ia][ja];
-    }
-  }
-  // R0_lattice-rotation tensor
-  // E_el-elastic strain  
-  elF_lattice = F_el;
-
-  std::vector<Real> e_value(3);
-  RankTwoTensor e_vector, N1, N2, N3;
-
-  RankTwoTensor temp1_lattice = elF_lattice.transpose() * elF_lattice;
-  temp1_lattice.symmetricEigenvaluesEigenvectors(e_value, e_vector);
-
-  const Real lambda1 = std::sqrt(e_value[0]);
-  const Real lambda2 = std::sqrt(e_value[1]);
-  const Real lambda3 = std::sqrt(e_value[2]);
-
-  N1.vectorOuterProduct(e_vector.column(0), e_vector.column(0));
-  N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
-  N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
-
-  RankTwoTensor elU =  N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
-  RankTwoTensor invelU(elU.inverse());
-
-  elR_lattice = elF_lattice * invelU;
-
-  R_lattice =  elR_lattice * R0_lattice;
-
-  Real N0[24][3], n_lattice[24][3], nr[24][3];
-
-  Real _h,_k,_l,_g0,_g1,_g2;
-  _h = 1.0; _k = 0.0; _l = 0.0;
-  _g0 = 0.0; _g1 = 0.0; _g2 = 1.0;
-
-  N0[0][0] = _h; N0[0][1] = _k; N0[0][2] = _l;
-  N0[1][0] = (-1.0)*_h; N0[1][1] = _k; N0[1][2] = _l;
-  N0[2][0] = _h; N0[2][1] = (-1.0)*_k; N0[2][2] = _l;
-  N0[3][0] = _h; N0[3][1] = _k; N0[3][2] = (-1.0)*_l;
-
-  N0[4][0] = _h; N0[4][1] = _l; N0[4][2] = _k;
-  N0[5][0] = (-1.0)*_h; N0[5][1] = _l; N0[5][2] = _k;
-  N0[6][0] = _h; N0[6][1] = (-1.0)*_l; N0[6][2] = _k;
-  N0[7][0] = _h; N0[7][1] = _l; N0[7][2] = (-1.0)*_k;
-
-  N0[8][0] = _k; N0[8][1] = _h; N0[8][2] = _l;
-  N0[9][0] = (-1.0)*_k; N0[9][1] = _h; N0[9][2] = _l;
-  N0[10][0] = _k; N0[10][1] = (-1.0)*_h; N0[10][2] = _l;
-  N0[11][0] = _k; N0[11][1] = _h; N0[11][2] = (-1.0)*_l;
-
-  N0[12][0] = _k; N0[12][1] = _l; N0[12][2] = _h;
-  N0[13][0] = (-1.0)*_k; N0[13][1] = _l; N0[13][2] = _h;
-  N0[14][0] = _k; N0[14][1] = (-1.0)*_l; N0[14][2] = _h;
-  N0[15][0] = _k; N0[15][1] = _l; N0[15][2] = (-1.0)*_h;
-
-  N0[16][0] = _l; N0[16][1] = _h; N0[16][2] = _k;
-  N0[17][0] = (-1.0)*_l; N0[17][1] = _h; N0[17][2] = _k;
-  N0[18][0] = _l; N0[18][1] = (-1.0)*_h; N0[18][2] = _k;
-  N0[19][0] = _l; N0[19][1] = _h; N0[19][2] = (-1.0)*_k;
-
-  N0[20][0] = _l; N0[20][1] = _k; N0[20][2] = _h;
-  N0[21][0] = (-1.0)*_l; N0[21][1] = _k; N0[21][2] = _h;
-  N0[22][0] = _l; N0[22][1] = (-1.0)*_k; N0[22][2] = _h;
-  N0[23][0] = _l; N0[23][1] = _k; N0[23][2] = (-1.0)*_h;
-
-  Real val_lattice;
-  for (unsigned int l=0; l<24; l++) {
-    val_lattice = N0[l][0]*N0[l][0] + N0[l][1]*N0[l][1] + N0[l][2]*N0[l][2];
-    N0[l][0] = N0[l][0]/sqrt(val_lattice);
-    N0[l][1] = N0[l][1]/sqrt(val_lattice);
-    N0[l][2] = N0[l][2]/sqrt(val_lattice);
-  }
-
-  for (unsigned int l = 0; l < 24; l++) {
-    for (unsigned int i = 0; i < 3; i++) {
-      n_lattice[l][i] = 0.0;
-      for (unsigned int j = 0; j < 3; j++) {
-          n_lattice[l][i] = n_lattice[l][i] + R_lattice(i,j) * N0[l][j];
-      }
-    }
-  }
-
-  latticeStrain_new = 0.0;
-  Real lattice_val = 0.0;
-  
-  for (unsigned int l = 0; l < 24; l++) {
-    cosangle = ((n_lattice[l][0]*_g0 + n_lattice[l][1]*_g1 + n_lattice[l][2]*_g2) / sqrt(n_lattice[l][0]*n_lattice[l][0] + n_lattice[l][1]*n_lattice[l][1] + n_lattice[l][2]*n_lattice[l][2]) / sqrt(_g0*_g0 + _g1*_g1 + _g2*_g2));
-
-    if (abs(acos(cosangle)* 180.0/(22.0/7.0)) <= 7.5) {
-      for (unsigned int i = 0; i < 3; i++) {
-          for (unsigned int j = 0; j < 3; j++) {
-            // lattice_val = lattice_val + (n_lattice[l][i] * _De_mat[_qp](i,j) * _dt * n_lattice[l][j]);     
-            lattice_val = lattice_val + (n_lattice[l][i] * E_e_dot(i,j) * n_lattice[l][j]);       
-          }
-      }
-      break;  
-    }   
-  } 
-  //cout<<lattice_val<<"\n";
-  latticeStrain_new = latticeStrain_old + lattice_val;
-
-  //Lattice strain 101
-  n = n + 1;
-  _state_var[_qp][n] = lattice_val;
-
-  Real schmid_vec[12];
-
-  // Schmid factor 
-  for (unsigned int ia = 0; ia < 3; ia++) {
-    for (unsigned int ja = 0; ja < 3; ja++) {
-      unit_sigma[ia][ja] = 0.0;
-    }
-  }
-  unit_sigma[2][2] = 1.0;
-
-  for (unsigned int k = 0; k < _num_slip_sys; k++) {
-  schmid_vec[k] = 0.0;
-  for (unsigned int j = 0; j < 3; j++) {
-    for (unsigned int i = 0; i < 3; i++) {
-        schmid_vec[k] = schmid_vec[k] + xs[i][k] * xm[j][k] * unit_sigma[i][j];
-      }
-    }
-  }
-
-  // Schmid values 102-113
-  for (unsigned int ia = 0; ia < _num_slip_sys; ia++) {
+  // Store SSD density values SDV 49 + _num_slip_sys
+  for (unsigned int i = 0; i < _num_slip_sys; i++) {
     n = n + 1;
-    _state_var[_qp][n] = schmid_vec[ia];
+    _state_var[_qp][n] = rho_SSD[i];
   }
 
-
+  // Store backstress values SDV 49 + _num_slip_sys*2
+  for (unsigned int i = 0; i < _num_slip_sys; i++) {
+    n = n + 1;
+    _state_var[_qp][n] = bstress[i];
+  }
+  
   // elasticity tensor
   for (unsigned int i = 0; i < 3; ++i){
     for (unsigned int j = 0; j < 3; ++j){
@@ -1553,7 +1217,7 @@ void DDCP_SSD_StressUpdate::computeQpStress()
 } // End computeStress()
 
 // NR_residual()
-void DDCP_SSD_StressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gdt, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv_0, Real C[3][3][3][3], std::vector<Real> &rho_m0, std::vector<Real> &rho_m, std::vector<Real> &bstress0, std::vector<Real> &bstress, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse, Real k_rho_vec[12]){
+void DDCP_SSD_StressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<std::vector<Real>> &xs0, std::vector<std::vector<Real>> &xm0, Real temp, Real dt, std::vector<Real> gdt, RankTwoTensor F1, RankTwoTensor &F_p_inv, RankTwoTensor F_p_inv_0, Real C[3][3][3][3], std::vector<Real> &rho_SSD0, std::vector<Real> &rho_SSD, std::vector<Real> &bstress0, std::vector<Real> &bstress, RankTwoTensor &sig, std::vector<Real> &tau, std::vector<Real> &tau_eff, std::vector<Real> &s_a, std::vector<Real> &s_t, std::vector<std::vector<Real>> A, std::vector<std::vector<Real>> H, std::vector<Real> &residual, Real &sse){
 
   Real xL_p_inter[3][3];
   std::vector<Real> shr_g(num_slip_sys);
@@ -1677,29 +1341,29 @@ void DDCP_SSD_StressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<
     }
   }
 
-  // Calculate dislocation densities, rho_m and back stress
+  // Calculate dislocation densities, rho_SSD and back stress
   std::vector<Real> drhomdt(num_slip_sys);
   std::vector<Real> dbstressdt(num_slip_sys);
   
   Real sum_rho = 0.0;
   for (unsigned int ib = 0; ib < num_slip_sys; ib++) {
-      sum_rho = sum_rho + rho_m0[ib];
+      sum_rho = sum_rho + rho_SSD0[ib];
   }
 
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
-    drhomdt[ia] = (k_M/b_mag) * sqrt(rho_m0[ia]) * abs(gdt[ia]) - k_I * rho_m0[ia] * abs(gdt[ia]);
+    drhomdt[ia] = (k_M/b_mag) * sqrt(rho_SSD0[ia]) * abs(gdt[ia]) - k_I * rho_SSD0[ia] * abs(gdt[ia]);
   }
 
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
-    rho_m[ia] = rho_m0[ia] + drhomdt[ia]*dt;
-    if(rho_m[ia] < 1.0e2) {
-      rho_m[ia] = 1.0e2;
+    rho_SSD[ia] = rho_SSD0[ia] + drhomdt[ia]*dt;
+    if(rho_SSD[ia] < 1.0e2) {
+      rho_SSD[ia] = 1.0e2;
     }
   }
 
   // Calculate the back stress for each slip system.
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
-    dbstressdt[ia] = (k_bs1*k_rho*G*b_mag*sqrt(rho_m[ia])*sgn(tau[ia] - bstress0[ia]) - k_bs2*bstress0[ia])*abs(gdt[ia]);
+    dbstressdt[ia] = (k_bs1*k_rho*G*b_mag*sqrt(rho_SSD[ia])*sgn(tau[ia] - bstress0[ia]) - k_bs2*bstress0[ia])*abs(gdt[ia]);
 
     bstress[ia] = bstress0[ia] + dbstressdt[ia] * dt;
   }
@@ -1708,7 +1372,7 @@ void DDCP_SSD_StressUpdate::NR_residual (unsigned int num_slip_sys, std::vector<
   for(unsigned int ia = 0; ia < num_slip_sys; ia++) {
     Real sum1 = 0.0;
     for(unsigned int ib = 0; ib < num_slip_sys; ib++) {
-      sum1 = sum1 + p0 * A[ia][ib] * rho_m[ib];
+      sum1 = sum1 + p0 * A[ia][ib] * rho_SSD[ib];
     }
     s_a[ia] = tau0 + hp_coeff/sqrt(grain_size) + k_rho * G * b_mag * sqrt(sum1);
   }
@@ -1787,20 +1451,24 @@ void DDCP_SSD_StressUpdate::assignProperties(){
   C12_perK = _properties[_qp][3];
   C44 = _properties[_qp][4];
   C44_perK = _properties[_qp][5];
+  G = _properties[_qp][6];
+  G_perK = _properties[_qp][7];
 
-//  G = _properties[_qp][6];
-//  G_perK = _properties[_qp][7];
-
-  C11 = C11 - C11_perK*_temp[_qp];
-  C12 = C12 - C12_perK*_temp[_qp];
-  C44 = C44 - C44_perK*_temp[_qp];
-//  G = G - G_perK*_temp[_qp];
+  // Temperature dependence of elastic constants for SS316 is hard coded
+  // Comment for other materials
+  // C11 = C11 - C11_perK*_temp[_qp];
+  C11 = (207.98 + 0.0724*_temp[_qp] - 1.75e-4*_temp[_qp]*_temp[_qp] + 5.26e-8*_temp[_qp]*_temp[_qp]*_temp[_qp]) * 1.0e3;
+  // C12 = C12 - C12_perK*_temp[_qp];
+  C12 = (135.77 + 0.0405*_temp[_qp] - 1.25e-4*_temp[_qp]*_temp[_qp] + 5.26e-8*_temp[_qp]*_temp[_qp]*_temp[_qp]) * 1.0e3;
+  // C44 = C44 - C44_perK*_temp[_qp];
+  C44 = (121.83 + 0.02413*_temp[_qp] - 8.20e-5*_temp[_qp]*_temp[_qp] + 3.49e-8*_temp[_qp]*_temp[_qp]*_temp[_qp]) * 1.0e3;
+  // G = G - G_perK*_temp[_qp];
+  G = C44;
 
   // use the appropriate one
   // G = 0.5e0*(C11 - C12);
-  
-  // Adapted from Gupta & Bronkhorst (2021) IJP, 137, 102896
-  G = sqrt(C44*0.5e0*(C11 - C12));
+  // G = sqrt(C44*0.5e0*(C11 - C12));
+  // G = C44;
 
   b_mag = _properties[_qp][8];  // Burgers vector magnitude
 
@@ -1828,7 +1496,7 @@ void DDCP_SSD_StressUpdate::assignProperties(){
   Alatent = _properties[_qp][20];  // Latent hardening coefficient
 
   // Dislocation evolution parameters
-  rho_m_zero = _properties[_qp][21];  // Initial mobile dislocation density
+  rho_SSD_zero = _properties[_qp][21];  // Initial mobile dislocation density
   k_M = _properties[_qp][22]; // Dislocation line generation constant
   k_bs1 = _properties[_qp][23];  // Backstress evolution constant 1
   k_bs2 = _properties[_qp][24];  // Backstress evolution constant 2
