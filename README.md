@@ -58,10 +58,16 @@ For the dislocation density-based J<sub>2</sub> plasticity model: Refs. [5,6]
 
 For numerical integration of the J<sub>2</sub> plasticity model: Ref. [7]
 
-- [1] Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
-- [2] Patra, A., Tomé, C.N., “A dislocation density-based crystal plasticity constitutive model: Comparison of VPSC effective medium predictions with ρ-CP finite element predictions”, Modelling and Simulation in Materials Science and Engineering, Vol. 32, 2024, 045014.
-- [3] Pai, N., Samajdar, I., Patra, A., “Study of orientation-dependent residual strains during tensile and cyclic deformation of an austenitic stainless steel”, International Journal of Plasticity, Vol. 185, 2025, 104228.
-- [4] Pokharel, R., Patra, A., Brown, D.W., Clausen, B., Vogel, S.C., Gray, G.T., “An analysis of phase stresses in additively manufactured 304L stainless steel using neutron diffraction measurements and crystal plasticity finite element simulations”, International Journal of Plasticity, Vol. 121, 2019, pp. 201-217.
-- [5] Khandelwal, S., Basu, S., Patra, A., “A machine learning-based surrogate modeling framework for predicting the history-dependent deformation of dual phase microstructures”, Materials Today Communications, Vol. 29, 2021, 102914.
-- [6] Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522.
-- [7] Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
+[1] Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
+
+[2] Patra, A., Tomé, C.N., “A dislocation density-based crystal plasticity constitutive model: Comparison of VPSC effective medium predictions with ρ-CP finite element predictions”, Modelling and Simulation in Materials Science and Engineering, Vol. 32, 2024, 045014.
+
+[3] Pai, N., Samajdar, I., Patra, A., “Study of orientation-dependent residual strains during tensile and cyclic deformation of an austenitic stainless steel”, International Journal of Plasticity, Vol. 185, 2025, 104228.
+
+[4] Pokharel, R., Patra, A., Brown, D.W., Clausen, B., Vogel, S.C., Gray, G.T., “An analysis of phase stresses in additively manufactured 304L stainless steel using neutron diffraction measurements and crystal plasticity finite element simulations”, International Journal of Plasticity, Vol. 121, 2019, pp. 201-217.
+
+[5] Khandelwal, S., Basu, S., Patra, A., “A machine learning-based surrogate modeling framework for predicting the history-dependent deformation of dual phase microstructures”, Materials Today Communications, Vol. 29, 2021, 102914.
+
+[6] Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522.
+
+[7] Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
