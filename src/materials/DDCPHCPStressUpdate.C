@@ -525,7 +525,7 @@ void DDCPHCPStressUpdate::computeQpStress()
         tarray1(i,j) = dir_cos0[i][j];
       }
     }
-    tarray2 = tarray1*R_twin.transpose();
+    tarray2 = R_twin.transpose()*tarray1;
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
