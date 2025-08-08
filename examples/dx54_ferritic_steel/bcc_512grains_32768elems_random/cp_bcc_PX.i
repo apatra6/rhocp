@@ -113,27 +113,27 @@
     family = MONOMIAL
   [../]
 
-  [./Eel11]
+  [./Fel11]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./Eel12]
+  [./Fel12]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./Eel13]
+  [./Fel13]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./Eel22]
+  [./Fel22]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./Eel23]
+  [./Fel23]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./Eel33]
+  [./Fel33]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -265,39 +265,39 @@
     execute_on = timestep_end
   [../]
 
-  [./Eel11]
+  [./Fel11]
     type = StateVariable
-    variable = Eel11
+    variable = Fel11
     sdv_id = 19
     execute_on = timestep_end
   [../]
-  [./Eel12]
+  [./Fel12]
     type = StateVariable
-    variable = Eel12
+    variable = Fel12
     sdv_id = 20
     execute_on = timestep_end
   [../]
-  [./Eel13]
+  [./Fel13]
     type = StateVariable
-    variable = Eel13
+    variable = Fel13
     sdv_id = 21
     execute_on = timestep_end
   [../]
-  [./Eel22]
+  [./Fel22]
     type = StateVariable
-    variable = Eel22
+    variable = Fel22
     sdv_id = 23
     execute_on = timestep_end
   [../]
-  [./Eel23]
+  [./Fel23]
     type = StateVariable
-    variable = Eel23
+    variable = Fel23
     sdv_id = 24
     execute_on = timestep_end
   [../]
-  [./Eel33]
+  [./Fel33]
     type = StateVariable
-    variable = Eel33
+    variable = Fel33
     sdv_id = 27
     execute_on = timestep_end
   [../]
@@ -488,29 +488,29 @@
     variable = Ep_eff
   [../]
 
-  [./Eel11]
+  [./Fel11]
     type = ElementAverageValue
-    variable = Eel11
+    variable = Fel11
   [../]
-  [./Eel12]
+  [./Fel12]
     type = ElementAverageValue
-    variable = Eel12
+    variable = Fel12
   [../]
-  [./Eel13]
+  [./Fel13]
     type = ElementAverageValue
-    variable = Eel13
+    variable = Fel13
   [../]
-  [./Eel22]
+  [./Fel22]
     type = ElementAverageValue
-    variable = Eel22
+    variable = Fel22
   [../]
-  [./Eel23]
+  [./Fel23]
     type = ElementAverageValue
-    variable = Eel23
+    variable = Fel23
   [../]
-  [./Eel33]
+  [./Fel33]
     type = ElementAverageValue
-    variable = Eel33
+    variable = Fel33
   [../]
 []
 
