@@ -8,7 +8,15 @@
 
 &rho;-CP is a crystal plasticity solver that interfaces with the open source finite element solver, MOOSE (https://github.com/idaholab/moose), for crystal plasticity finite element modeling of anisotropic, heterogeneous deformation in polycrystalline ensembles. Source codes for the dislocation density-based crystal plasticity solver are provided in this repository. 
 
-There are several constitutive models implemented for the different examples provided: (a) mobile and immobile dislocation density based crystal plasticity model, with threshold lattice resistance (DDCPStressUpdate, DDCPHCPStressUpdate) (Ref. [1]), (b) mobile and immobile dislocation density based crystal plasticity model, without threshold lattice resistance (DDCPTSTStressUpdate) (Ref. [2]), (c) statistically stored dislocation (SSD) density based Kocks-Mecking crystal plasticity model (DDCP_SSD_StressUpdate) (Ref. [3]), (d) mobile and immobile dislocation density based J<sub>2</sub> plasticity model (DDJ2StressUpdate) (Refs. [5,6]).
+There are several constitutive models implemented for the different examples provided: 
+
+(a) mobile and immobile dislocation density based crystal plasticity model, with threshold lattice resistance (DDCPStressUpdate, DDCPHCPStressUpdate) (Ref. [1])
+
+(b) mobile and immobile dislocation density based crystal plasticity model, without threshold lattice resistance (DDCPTSTStressUpdate) (Ref. [2,8])
+
+(c) statistically stored dislocation (SSD) density based Kocks-Mecking crystal plasticity model (DDCP_SSD_StressUpdate) (Ref. [3])
+
+(d) mobile and immobile dislocation density based J<sub>2</sub> plasticity model (DDJ2StressUpdate) (Refs. [5,6])
 
 Details of the framework and numerical implementation are available at:
 https://doi.org/10.1016/j.commatsci.2023.112182  
@@ -38,7 +46,7 @@ to get the executable `rhocp-dbg` (more details can be found at: https://moosefr
 
 ## Running Simulations
 - The user is suggested to first go through the basics of running MOOSE simulations (https://mooseframework.inl.gov/getting_started/examples_and_tutorials/index.html).
-- Example simulation files for magnesium, copper, tantalum, 304L stainless steel, DX54 ferritic steel and 316 austenitic stainless steel are located in the `examples` directory.
+- Example simulation files for magnesium, copper, tantalum, 304L stainless steel, DX54 ferritic steel, 316 and 317L austenitic stainless steel are located in the `examples` directory.
 - The following input files are required to run a &rho;-CP simulation: (a) MOOSE input file, with `.i` extension, (b) slip system information file (`bcc_slip_sys.in`, for example), (c) material properties file (`bcc_props.in`, for example), (d) grain orientations in the form of Bunge Euler angles (`orientations.in`, for example). Additionally, the mesh may be: (i) created in the MOOSE input file itself, (ii) imported from an Exodus file (`64grains_512elements.e`, for example), or (iii) imported from an EBSD mesh file (`tantalum_input_original_euler.txt` in `examples/tantalum/EBSD_simulation`, for example). For the last case, Euler angles need not be imported separately.
 - The EBSD mesh file can be created using DREAM3D. See: https://mooseframework.inl.gov/source/userobjects/EBSDReader.html and http://www.dream3d.io/2_Tutorials/EBSDReconstruction/ for additional details.
 - Simulations can be run using the following example command:  
@@ -73,3 +81,5 @@ For numerical integration of the J<sub>2</sub> plasticity model: Ref. [7]
 [6] Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522.
 
 [7] Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
+
+[8] Patra, A., Tomé, C.N., “Multiscale crystal plasticity modeling of deformation in an austenitic stainless steel”, Mechanics Research Communications, Vol. 148, 2025, 104490.
