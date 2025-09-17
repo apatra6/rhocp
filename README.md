@@ -28,7 +28,9 @@ Details of pre- and post-processing are given in: <a href="rho-CP_Pre_and_Post_P
 
 ![Screenshot](rhoCP_graphic.png)
 
-All input files tested with MOOSE version: 024e31760a (2024-08-13), PETSc version: 3.21.4, SLEPc version: 3.21.1
+All input files tested with MOOSE version: 35c8c4a9a0 (2025-09-17), PETSc version: 3.23.4, SLEPc version: 3.23.2
+
+Note: If you are using an older version of MOOSE, you may need to uncomment some lines in src/base/RhocpApp.C
 
 ## Installation
 The user needs to install MOOSE first (https://mooseframework.inl.gov/getting_started/installation/index.html), then clone and compile &rho;-CP alongside MOOSE in the `projects` directory:

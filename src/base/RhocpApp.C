@@ -40,25 +40,26 @@ RhocpApp::registerApps()
   registerApp(RhocpApp);
 }
 
-void
-RhocpApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"RhocpApp"});
-}
-
-void
-RhocpApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("use registerAll instead of registerExecFlags");
-}
-
-void
-RhocpApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"RhocpApp"});
-}
+// AP: If you are using an older version of MOOSE (prior to Sep. 2025), uncomment this
+// void
+// RhocpApp::registerObjects(Factory & factory)
+// {
+//   mooseDeprecated("use registerAll instead of registerObjects");
+//   Registry::registerObjectsTo(factory, {"RhocpApp"});
+// }
+//
+// void
+// RhocpApp::registerExecFlags(Factory & /*factory*/)
+// {
+//   mooseDeprecated("use registerAll instead of registerExecFlags");
+// }
+//
+// void
+// RhocpApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+// {
+//   mooseDeprecated("use registerAll instead of associateSyntax");
+//   Registry::registerActionsTo(action_factory, {"RhocpApp"});
+// }
 
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
