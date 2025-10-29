@@ -1,10 +1,4 @@
 # &rho;-CP: Open Source Dislocation Density Based Crystal Plasticity Framework for Simulating Temperature- and Strain Rate-Dependent Deformation
-### Anirban Patra<sup>1*</sup>, Suketa Chaudhary<sup>1</sup>, Namit Pai<sup>1</sup>, Tarakram Ramgopal<sup>1</sup>, Sarthak Khandelwal<sup>1</sup>, Adwitiya Rao<sup>1</sup>, David L. McDowell<sup>2,3**</sup>
-#### <sup>1</sup>Department of Metallurgical Engineering and Materials Science, Indian Institute of Technology Bombay, Mumbai, India
-#### <sup>2</sup>School of Materials Science and Engineering, Georgia Institute of Technology, Atlanta, USA
-#### <sup>3</sup>GWW School of Mechanical Engineering, Georgia Institute of Technology, Atlanta, USA
-#### <sup>*</sup>anirbanpatra@iitb.ac.in; anirbanpatra@gmail.com
-#### <sup>**</sup>david.mcdowell@me.gatech.edu
 
 &rho;-CP is a crystal plasticity solver that interfaces with the open source finite element solver, MOOSE (https://github.com/idaholab/moose), for crystal plasticity finite element modeling of anisotropic, heterogeneous deformation in polycrystalline ensembles. Source codes for the dislocation density-based crystal plasticity solver are provided in this repository. 
 
@@ -12,11 +6,13 @@ There are several constitutive models implemented for the different examples pro
 
 (a) mobile and immobile dislocation density based crystal plasticity model, with threshold lattice resistance (DDCPStressUpdate, DDCPHCPStressUpdate) (Ref. [1])
 
-(b) mobile and immobile dislocation density based crystal plasticity model, without threshold lattice resistance (DDCPTSTStressUpdate) (Ref. [2,8])
+(b) mobile and immobile dislocation density based crystal plasticity model, without threshold lattice resistance (DDCPTSTStressUpdate) (Ref. [2,9])
 
-(c) statistically stored dislocation (SSD) density based Kocks-Mecking crystal plasticity model (DDCP_SSD_StressUpdate) (Ref. [3])
+(c) statistically stored dislocation (SSD) density based Kocks-Mecking crystal plasticity model (DDCP_SSD_StressUpdate) (Ref. [3]) (code developed by Namit Pai)
 
-(d) mobile and immobile dislocation density based J<sub>2</sub> plasticity model (DDJ2StressUpdate) (Refs. [5,6])
+(d) crystal plasticity model for hardening and creep under thermal and irradiation environments (ThermalIrradiationCPUpdate) (Ref. [5]) (code developed by Vikram Roy)
+
+(e) mobile and immobile dislocation density based J<sub>2</sub> plasticity model (DDJ2StressUpdate) (Refs. [6,7])
 
 Details of the framework and numerical implementation are available at:
 https://doi.org/10.1016/j.commatsci.2023.112182  
@@ -66,9 +62,11 @@ For SSD-based Kocks-Mecking crystal plasticity model: Ref. [3]
 
 For thermal Eigen strains and prediction of residual/internal strains: Refs. [3,4]
 
-For the dislocation density-based J<sub>2</sub> plasticity model: Refs. [5,6]
+For crystal plasticity model for irradiation hardening and creep: Ref. [5]
 
-For numerical integration of the J<sub>2</sub> plasticity model: Ref. [7]
+For the dislocation density-based J<sub>2</sub> plasticity model: Refs. [6,7]
+
+For numerical integration of the J<sub>2</sub> plasticity model: Ref. [8]
 
 [1] Patra, A., Chaudhary, S., Pai, N., Ramgopal, T., Khandelwal, S., Rao, A., McDowell, D.L., “&rho;-CP: Open source dislocation density based crystal plasticity framework for simulating temperature- and strain rate-dependent deformation”, Computational Materials Science, Vol. 224, 2023, 112182.
 
@@ -78,10 +76,12 @@ For numerical integration of the J<sub>2</sub> plasticity model: Ref. [7]
 
 [4] Pokharel, R., Patra, A., Brown, D.W., Clausen, B., Vogel, S.C., Gray, G.T., “An analysis of phase stresses in additively manufactured 304L stainless steel using neutron diffraction measurements and crystal plasticity finite element simulations”, International Journal of Plasticity, Vol. 121, 2019, pp. 201-217.
 
-[5] Khandelwal, S., Basu, S., Patra, A., “A machine learning-based surrogate modeling framework for predicting the history-dependent deformation of dual phase microstructures”, Materials Today Communications, Vol. 29, 2021, 102914.
+[5] Roy, V., Khan, I.A., Patra, A., "Crystal plasticity modeling of hardening and creep in ferritic - martensitic alloys under thermal and irradiation environments", International Journal of Plasticity, 2025, 104513.
 
-[6] Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522.
+[6] Khandelwal, S., Basu, S., Patra, A., “A machine learning-based surrogate modeling framework for predicting the history-dependent deformation of dual phase microstructures”, Materials Today Communications, Vol. 29, 2021, 102914.
 
-[7] Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
+[7] Basu, S., Patra, A., Jaya, B.N., Ganguly, S., Dutta, M., Samajdar, I., “Study of microstructure - property correlations in dual phase steels for achieving enhanced strength and reduced strain partitioning”, Materialia, Vol. 25, 2022, 101522.
 
-[8] Patra, A., Tomé, C.N., “Multiscale crystal plasticity modeling of deformation in an austenitic stainless steel”, Mechanics Research Communications, Vol. 148, 2025, 104490.
+[8] Patra, A., Pai, N., Sharma, P., “Modeling intrinsic size effects using dislocation density-based strain gradient plasticity”, Mechanics Research Communications, Vol. 127, 2023, 104038.
+
+[9] Patra, A., Tomé, C.N., “Multiscale crystal plasticity modeling of deformation in an austenitic stainless steel”, Mechanics Research Communications, Vol. 148, 2025, 104490.
