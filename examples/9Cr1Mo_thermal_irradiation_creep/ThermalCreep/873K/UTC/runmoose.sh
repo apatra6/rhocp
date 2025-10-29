@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Define Simulation Parameters for Thermal Creep Simulation
+
+NPROCS=20
+STRESS=(100 120 140 150 175 200 220)
+TIME1=(5e5 5e5 1e5 5e4 5e4 5e3 5e2)     # End times for initial simulations
+TIME2=(5e7 5e7 2e6 1e6 5e5 5e4 5e3)     # End times for recovered simulations
+TEMP=873
+
+# Export path to rhocp-opt
+# provide appropriate path here
+export RHOCPOPT=~/projects/rhocp/rhocp-opt
+# change mpirun to appropriate mpi command
+
+# Iterate over the array index to pair STRESS, TIME1, and TIME2 correctly
+for i in "${!STRESS[@]}"
+do
+    stress=${STRESS[$i]}
+    time1=${TIME1[$i]}
+    time2=${TIME2[$i]}
+
+    echo "Running initial simulation for STRESS=${stress} MPa, TEMP=${TEMP} K, end_time=${time1}"
+
+    # Run the initial simulation
+    mpirun -n "$NPROCS" $RHOCPOPT -i bcc_pxtal.i \
+        sigmaV="$stress" \
+        Materials/CPStressUpdate/temp="$TEMP" \
+        Materials/CPStressUpdate/climbmodel=true \
+        Executioner/end_time="$time1" \
+        Executioner/TimeStepper/log_dt=0.10 \
+        Outputs/file_base="out_Creep_${TEMP}K_${stress}MPa" > "log${stress}.run"
+
+    echo "Initial run complete. Starting recovered simulation with end_time=${time2}"
+
+    # Run the recovered simulation
+    mpirun -n "$NPROCS" $RHOCPOPT -i bcc_pxtal.i \
+        sigmaV="$stress" \
+        Materials/CPStressUpdate/temp="$TEMP" \
+        Materials/CPStressUpdate/climbmodel=true \
+        Executioner/end_time="$time2" \
+        Executioner/TimeStepper/log_dt=0.01 \
+        Outputs/file_base="out_Creep_${TEMP}K_${stress}MPa" --recover > "log${stress}r1.run"
+done
+
+
+
+STRESS=(70 130 160)
+TIME1=(5e5 5e5 5e4)     # End times for initial simulations
+TIME2=(5e7 1e7 1e6)     # End times for recovered simulations
+TEMP=873
+
+# Iterate over the array index to pair STRESS, TIME1, and TIME2 correctly
+for i in "${!STRESS[@]}"
+do
+    stress=${STRESS[$i]}
+    time1=${TIME1[$i]}
+    time2=${TIME2[$i]}
+
+    echo "Running initial simulation for STRESS=${stress} MPa, TEMP=${TEMP} K, end_time=${time1}"
+
+    # Run the initial simulation
+    mpirun -n "$NPROCS" $RHOCPOPT -i bcc_pxtal.i \
+        sigmaV="$stress" \
+        Materials/CPStressUpdate/temp="$TEMP" \
+        Materials/CPStressUpdate/climbmodel=true \
+        Executioner/end_time="$time1" \
+        Executioner/TimeStepper/log_dt=0.10 \
+        Outputs/file_base="out_Creep_${TEMP}K_${stress}MPa" > "log${stress}.run"
+
+    echo "Initial run complete. Starting recovered simulation with end_time=${time2}"
+
+    # Run the recovered simulation
+    mpirun -n "$NPROCS" $RHOCPOPT -i bcc_pxtal.i \
+        sigmaV="$stress" \
+        Materials/CPStressUpdate/temp="$TEMP" \
+        Materials/CPStressUpdate/climbmodel=true \
+        Executioner/end_time="$time2" \
+        Executioner/TimeStepper/log_dt=0.01 \
+        Outputs/file_base="out_Creep_${TEMP}K_${stress}MPa" --recover > "log${stress}r1.run"
+done
