@@ -31,7 +31,7 @@ GrainAreaSize::updateArea()
   //Generate neighbor list for each element
 
   auto & mesh = _mesh.getMesh();
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   _total_elems = mesh.n_elem();
 
   _grain_area.clear();
